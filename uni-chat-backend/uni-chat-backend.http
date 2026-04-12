@@ -1,0 +1,6 @@
+@uni_chat_backend_HostAddress = http://localhost:5012
+
+GET {{uni_chat_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
