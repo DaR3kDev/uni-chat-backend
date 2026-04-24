@@ -3,15 +3,17 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace uni_chat_backend.Domain.Entities;
 
-public class User
+public class Conversation
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)]
     public Guid Id { get; set; }
-    public string? Username { get; set; }
-    public string? Email { get; set; }
-    public string? Password { get; set; }
+    public bool IsGroup { get; set; }
+    public string? Title { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public bool IsOnline { get; set; } = false;
-    public DateTime? LastSeen { get; set; }
+    public DateTime? LastMessageAt { get; set; }
+
+    //Relationships
+    public List<ConversationParticipant> Participants { get; set; } = [];
 }
+
