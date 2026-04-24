@@ -426,3 +426,14 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# =========================
+# ASP.NET CONFIG SECRETS
+# =========================
+
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+
+# (opcional si usas user secrets)
+secrets.json
