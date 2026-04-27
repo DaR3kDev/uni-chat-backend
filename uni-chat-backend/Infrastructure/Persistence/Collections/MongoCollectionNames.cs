@@ -5,5 +5,6 @@ public static class MongoCollectionNames
     public const string Users = "users";
     public const string Messages = "messages";
     public const string Conversations = "conversations";
+    public const string RefreshToken = "refreshToken";
 }
 

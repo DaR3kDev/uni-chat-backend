@@ -1,9 +1,7 @@
 using FluentValidation;
-using MediatR;
 using Scalar.AspNetCore;
 using System.Reflection;
-using uni_chat_backend.API;
-using uni_chat_backend.API.Endpoints.Users;
+using uni_chat_backend.API.Extensions;
 using uni_chat_backend.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,8 +26,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapCreateUser();
-
 app.MapEndpoints();
-
+app.UseCustomException();
 app.Run();

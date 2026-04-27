@@ -5,8 +5,9 @@ namespace uni_chat_backend.Infrastructure.Persistence.Collections;
 
 public interface IMongoCollections
 {
-    IMongoCollection<User> Users { get; set; }
-    IMongoCollection<Message> Messages { get; set; }
-    IMongoCollection<Conversation> Conversations { get; set; }
+    IMongoCollection<User> Users { get; }
+    IMongoCollection<Message> Messages { get; }
+    IMongoCollection<Conversation> Conversations { get; }
+    IMongoCollection<RefreshToken> RefreshTokens { get; }
 }
 

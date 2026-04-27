@@ -5,7 +5,7 @@ using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 
 namespace uni_chat_backend.Infrastructure.Repositories;
 
-public class ConversationRepository(MongoCollections mongoCollections) : IConversationRepository
+public class ConversationRepository(IMongoCollections mongoCollections) : IConversationRepository
 {
     private readonly IMongoCollection<Conversation> _conversations = mongoCollections.Conversations;
 

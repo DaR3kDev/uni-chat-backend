@@ -5,7 +5,7 @@ using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 
 namespace uni_chat_backend.Infrastructure.Repositories;
 
-public class MessageRepository(MongoCollections mongoCollections) : IMessageRepository
+public class MessageRepository(IMongoCollections mongoCollections) : IMessageRepository
 {
     private readonly IMongoCollection<Message> _messages = mongoCollections.Messages;
 
