@@ -19,7 +19,7 @@ public class LoginHandler(
         var accessToken = tokenService.GenerateAccessToken(user);
         var refreshToken = tokenService.GenerateRefreshToken(user.Id);
 
-        await refreshTokenRepository.ReplaceAsync(user.Id, refreshToken);
+        await refreshTokenRepository.RevokeAsync(user.Id, refreshToken.Token);
 
         return new AuthResponse
         {

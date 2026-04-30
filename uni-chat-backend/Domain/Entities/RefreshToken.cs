@@ -14,7 +14,7 @@ public class RefreshToken
     [BsonRepresentation(BsonType.String)]
     public Guid UserId { get; set; }
 
-    public DateTime Expires { get; set; }
+    public DateTime ExpiresAt { get; set; }
 
     public bool IsRevoked { get; set; }
 

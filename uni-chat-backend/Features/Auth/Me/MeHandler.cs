@@ -15,15 +15,9 @@ public class MeHandler(
 
     public async Task<User> Handle(MeCommand request, CancellationToken cancellationToken)
     {
-        var userId = _currentUserService.UserId;
+        var userId = _currentUserService.UserId ?? throw new UnauthorizedAccessException("Usuario no autenticado");
 
-        if (userId is null)
-            throw new UnauthorizedAccessException("Usuario no autenticado");
-
-        var user = await _userRepository.GetByIdAsync(userId.Value);
-
-        if (user is null)
-            throw new Exception("Usuario no encontrado");
+        var user = await _userRepository.GetByIdAsync(userId) ?? throw new Exception("Usuario no encontrado");
 
         return user;
     }

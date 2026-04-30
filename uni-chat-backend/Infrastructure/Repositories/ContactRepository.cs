@@ -21,6 +21,7 @@ public class ContactRepository(IMongoCollections mongoCollections) : IContactRep
 
         return await _contacts.Find(filter).AnyAsync();
     }
+
     public async Task<List<Contact>> GetByOwnerPagedAsync(Guid ownerUserId, int page, int pageSize, string? search)
     {
         var filter = Builders<Contact>.Filter.Eq(x => x.OwnerUserId, ownerUserId);

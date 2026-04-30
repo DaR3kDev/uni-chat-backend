@@ -13,6 +13,7 @@ public static class EndpointExtensions
         app.MapLoginEndpoint();
         app.MapRegisterEndpoint();
         app.MapMeEndpoint();
+        app.MapRefreshEndpoint();
 
         // Contact endpoints
         app.MapAddContactEndpoint();

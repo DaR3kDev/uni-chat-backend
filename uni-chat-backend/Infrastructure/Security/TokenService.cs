@@ -52,7 +52,7 @@ public class TokenService(JwtSettings jwt, RefreshTokenSettings refresh)
             Id = Guid.NewGuid(),
             Token = Convert.ToBase64String(randomBytes),
             UserId = userId,
-            Expires = DateTime.UtcNow.AddDays(_refresh.ExpireDays),
+            ExpiresAt = DateTime.UtcNow.AddDays(_refresh.ExpireDays),
             IsRevoked = false
         };
     }
