@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using uni_chat_backend.Features.Auth.Login;
-using uni_chat_backend.Features.Auth.Shared;
 
 namespace uni_chat_backend.API.Endpoints.Auth;
 
@@ -12,23 +11,26 @@ public static class LoginEndpoint
         app.MapPost("/api/auth/login", async (
             LoginCommand command,
             IMediator mediator,
-            HttpContext httpContext) =>
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
         {
-            var result = await mediator.Send(command);
+            var result = await mediator.Send(command, cancellationToken);
 
             httpContext.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
+                Path = "/",
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
             return Results.Ok(new
             {
-                message = "Login exitoso",
+                mensaje = "Inicio de sesión exitoso",
                 accessToken = result.AccessToken
             });
-        });
+        })
+        .WithTags("Auth");
     }
 }

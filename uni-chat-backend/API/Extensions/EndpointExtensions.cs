@@ -1,4 +1,5 @@
 ﻿using uni_chat_backend.API.Endpoints.Auth;
+using uni_chat_backend.API.Endpoints.Contact;
 
 namespace uni_chat_backend.API.Extensions;
 
@@ -10,5 +11,10 @@ public static class EndpointExtensions
         app.MapLoginEndpoint();
         app.MapRegisterEndpoint();
         app.MapMeEndpoint();
+
+        // Contact endpoints
+        app.MapAddContactEndpoint();
+        app.MapGetContactsEndpoint();
+        app.MapDeleteContactEndpoint();
     }
 }

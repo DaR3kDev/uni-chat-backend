@@ -8,7 +8,6 @@ using uni_chat_backend.Application.Behaviors;
 using uni_chat_backend.Infrastructure.Configuration;
 using uni_chat_backend.Infrastructure.Persistence;
 using uni_chat_backend.Infrastructure.Persistence.Collections;
-using uni_chat_backend.Infrastructure.Persistence.Indexes;
 using uni_chat_backend.Infrastructure.Persistence.Indexes.Initialization;
 using uni_chat_backend.Infrastructure.Repositories;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
@@ -65,6 +64,7 @@ public static class DependencyInjection
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IContactRepository, ContactRepository>();
 
         // HttpContext
         services.AddHttpContextAccessor();

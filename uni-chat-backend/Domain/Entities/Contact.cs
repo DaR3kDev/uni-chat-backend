@@ -13,7 +13,7 @@ public class Contact
     public Guid OwnerUserId { get; set; } 
 
     [BsonRepresentation(BsonType.String)]
-    public Guid ContactUserId { get; set; } 
+    public Guid ContactUserId { get; set; }
 
     public string? Alias { get; set; } 
 

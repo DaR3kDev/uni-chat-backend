@@ -8,12 +8,15 @@ public static class MeEndpoint
 {
     public static void MapMeEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/auth/me",
-            [Authorize] async (IMediator mediator) =>
-            {
-                var result = await mediator.Send(new MeCommand());
-                return Results.Ok(result);
-            })
-            .WithTags("Auth");
+        app.MapGet("/api/auth/me", async (
+            IMediator mediator,
+            CancellationToken cancellationToken) =>
+        {
+            var result = await mediator.Send(new MeCommand(), cancellationToken);
+
+            return Results.Ok(result);
+        })
+        .WithTags("Auth")
+        .RequireAuthorization();
     }
 }

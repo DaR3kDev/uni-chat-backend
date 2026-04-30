@@ -39,6 +39,7 @@ public class RegisterHandler(
             Phone = request.Phone,
             Email = email,
             Username = username,
+            IsOnline = true,
             CreatedAt = DateTime.UtcNow
         };
 
