@@ -8,6 +8,7 @@ public class Conversation
     [BsonId]
     [BsonRepresentation(BsonType.String)]
     public Guid Id { get; set; }
+    public string? EncryptionKey { get; set; } 
     public bool IsGroup { get; set; }
     public string? Title { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -15,5 +16,6 @@ public class Conversation
 
     //Relationships
     public List<ConversationParticipant> Participants { get; set; } = [];
+    public bool IsDeleted { get; set; } = false;
 }
 

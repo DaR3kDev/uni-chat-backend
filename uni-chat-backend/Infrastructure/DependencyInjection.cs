@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using System.Text;
 using uni_chat_backend.Application.Behaviors;
@@ -13,7 +16,6 @@ using uni_chat_backend.Infrastructure.Repositories;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
-using uni_chat_backend.Infrastructure.Services;
 
 namespace uni_chat_backend.Infrastructure;
 
@@ -24,6 +26,7 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(configuration);
 
         // Configuración Mongo
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
         services.Configure<MongoSettings>(configuration.GetSection("Mongo"));
 
         // JWT + Seguridad
@@ -60,10 +63,10 @@ public static class DependencyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
         // Repositories
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
-        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IContactRepository, ContactRepository>();
 
         // HttpContext
@@ -94,15 +97,15 @@ public static class DependencyInjection
         services.AddSingleton<TokenService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        // Password hashing
-        services.AddSingleton(sp =>
-        {
-            var settings = sp.GetRequiredService<IOptions<Argon2Settings>>().Value;
-            return new Argon2PasswordHasher(settings);
-        });
+        //// Password hashing
+        //services.AddSingleton(sp =>
+        //{
+        //    var settings = sp.GetRequiredService<IOptions<Argon2Settings>>().Value;
+        //    return new Argon2PasswordHasher(settings);
+        //});
 
-        // Otros servicios
-        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        //// Otros servicios
+        //services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         return services;
     }

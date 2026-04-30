@@ -6,5 +6,6 @@ public class EncryptionData
     public string? Nonce { get; set; } 
     public string? PublicKey { get; set; }
     public string? Algorithm { get; set; }
+    public DateTime EncryptedAt { get; set; } = DateTime.UtcNow;
 }
 
