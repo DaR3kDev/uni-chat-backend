@@ -8,6 +8,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173", "http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
@@ -28,9 +40,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCustomMiddlewares();    
-app.UseAuthentication();      
+app.UseRouting();
+
+app.UseCors("CorsPolicy");
+
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCustomMiddlewares();
 
 app.MapEndpoints();
 

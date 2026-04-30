@@ -27,5 +27,6 @@ public static class EndpointExtensions
         // Message endpoints
         app.MapMessagesEndpoints();
         app.MapGetMessagesEndpoint();
+        app.MapDeleteMessageEndpoint();
     }
 }

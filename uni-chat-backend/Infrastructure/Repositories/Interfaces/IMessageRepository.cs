@@ -8,7 +8,15 @@ public interface IMessageRepository
 
     Task<Message?> GetByIdAsync(Guid messageId);
 
-    Task<List<Message>> GetByConversationIdAsync(Guid conversationId, int limit = 50);
+    Task<List<Message>> GetByConversationIdAsync(
+        Guid conversationId,
+        int limit = 50
+    );
 
     Task MarkAsDeletedAsync(Guid messageId);
+ 
+    Task<int> MarkConversationAsReadAsync(
+        Guid conversationId,
+        Guid userId
+    );
 }

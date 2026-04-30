@@ -19,7 +19,7 @@ public class Message
     public bool IsEdited { get; set; } = false;
     public DateTime? EditedAt { get; set; }
 
+
     // Relationships
     public EncryptionData? Encryption { get; set; }
-    public string? ClientTempId { get; set; }
 }

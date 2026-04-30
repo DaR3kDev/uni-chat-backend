@@ -27,7 +27,7 @@ public static class LoginEndpoint
 
             return Results.Ok(new
             {
-                mensaje = "Inicio de sesión exitoso",
+                message = "Inicio de sesión exitoso",
                 accessToken = result.AccessToken
             });
         })

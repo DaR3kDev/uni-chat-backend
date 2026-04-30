@@ -12,5 +12,6 @@ public interface IMongoCollections
     IMongoCollection<Contact> Contacts { get; }
     IMongoCollection<MessageDelivery> MessageDeliveries { get; }
     IMongoCollection<MessageRead> MessageReads { get; }
+    
 }
 
