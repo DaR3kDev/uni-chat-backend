@@ -9,5 +9,8 @@ public interface IMongoCollections
     IMongoCollection<Message> Messages { get; }
     IMongoCollection<Conversation> Conversations { get; }
     IMongoCollection<RefreshToken> RefreshTokens { get; }
+    IMongoCollection<Contact> Contacts { get; }
+    IMongoCollection<MessageDelivery> MessageDeliveries { get; }
+    IMongoCollection<MessageRead> MessageReads { get; }
 }
 

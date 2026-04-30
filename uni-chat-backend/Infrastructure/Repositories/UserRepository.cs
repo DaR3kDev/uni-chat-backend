@@ -22,6 +22,11 @@ public class UserRepository(IMongoCollections mongoCollections) : IUserRepositor
             .Find(u => u.Id == id)
             .FirstOrDefaultAsync();
 
+    public async Task<User?> GetByPhoneAsync(string phone) =>
+        await _users
+            .Find(u => u.Phone == phone)
+            .FirstOrDefaultAsync();
+
     public async Task<User?> GetByUsernameAsync(string username) => 
         await _users
             .Find(u => u.Username == username)

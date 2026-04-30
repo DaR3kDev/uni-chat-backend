@@ -13,7 +13,10 @@ builder.Services.AddMediatR(cfg =>
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -23,9 +26,12 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-
 app.UseHttpsRedirection();
 
+app.UseCustomMiddlewares();    
+app.UseAuthentication();      
+app.UseAuthorization();
+
 app.MapEndpoints();
-app.UseCustomException();
+
 app.Run();

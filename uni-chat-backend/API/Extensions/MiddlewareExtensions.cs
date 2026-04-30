@@ -4,9 +4,11 @@ namespace uni_chat_backend.API.Extensions;
 
 public static class MiddlewareExtensions
 {
-    public static IApplicationBuilder UseCustomException(this IApplicationBuilder app)
+    public static IApplicationBuilder UseCustomMiddlewares(this IApplicationBuilder app)
     {
-        return app.UseMiddleware<ExceptionMiddleware>();
+        app.UseMiddleware<SecurityHeadersMiddleware>();
+        app.UseMiddleware<ExceptionMiddleware>();
+
+        return app;
     }
 }
-

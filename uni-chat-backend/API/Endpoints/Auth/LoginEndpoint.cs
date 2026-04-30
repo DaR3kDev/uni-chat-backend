@@ -1,21 +1,18 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using uni_chat_backend.Domain.Entities;
-using uni_chat_backend.Features.Auth.Register;
+using uni_chat_backend.Features.Auth.Login;
 using uni_chat_backend.Features.Auth.Shared;
 
 namespace uni_chat_backend.API.Endpoints.Auth;
 
-public static class RegisterEndpoint
+public static class LoginEndpoint
 {
-    public static void MapRegisterEndpoint(this IEndpointRouteBuilder app)
+    public static void MapLoginEndpoint(this IEndpointRouteBuilder app)
     {
-
-        app.MapPost("/api/auth/register", async (
-        RegisterCommand command,
-        IMediator mediator,
-        HttpContext httpContext) =>
+        app.MapPost("/api/auth/login", async (
+            LoginCommand command,
+            IMediator mediator,
+            HttpContext httpContext) =>
         {
             var result = await mediator.Send(command);
 
@@ -29,7 +26,7 @@ public static class RegisterEndpoint
 
             return Results.Ok(new
             {
-                message = "Usuario registrado correctamente",
+                message = "Login exitoso",
                 accessToken = result.AccessToken
             });
         });

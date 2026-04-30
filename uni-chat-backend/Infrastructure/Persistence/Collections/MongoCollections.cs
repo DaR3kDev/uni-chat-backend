@@ -6,8 +6,24 @@ namespace uni_chat_backend.Infrastructure.Persistence.Collections;
 
 public class MongoCollections(MongoContext context) : IMongoCollections
 {
-    public IMongoCollection<User> Users { get; } = context.Database.GetCollection<User>(MongoCollectionNames.Users);
-    public IMongoCollection<Message> Messages { get; } = context.Database.GetCollection<Message>(MongoCollectionNames.Messages);
-    public IMongoCollection<Conversation> Conversations { get; } = context.Database.GetCollection<Conversation>(MongoCollectionNames.Conversations);
-    public IMongoCollection<RefreshToken> RefreshTokens { get; } = context.Database.GetCollection<RefreshToken>(MongoCollectionNames.RefreshToken);
+    public IMongoCollection<User> Users { get; } =
+        context.Database.GetCollection<User>(MongoCollectionNames.Users);
+
+    public IMongoCollection<Message> Messages { get; } =
+        context.Database.GetCollection<Message>(MongoCollectionNames.Messages);
+
+    public IMongoCollection<Conversation> Conversations { get; } =
+        context.Database.GetCollection<Conversation>(MongoCollectionNames.Conversations);
+
+    public IMongoCollection<RefreshToken> RefreshTokens { get; } =
+        context.Database.GetCollection<RefreshToken>(MongoCollectionNames.RefreshTokens);
+
+    public IMongoCollection<Contact> Contacts { get; } =
+        context.Database.GetCollection<Contact>(MongoCollectionNames.Contacts);
+
+    public IMongoCollection<MessageDelivery> MessageDeliveries { get; } =
+        context.Database.GetCollection<MessageDelivery>(MongoCollectionNames.MessageDeliveries);
+
+    public IMongoCollection<MessageRead> MessageReads { get; } =
+        context.Database.GetCollection<MessageRead>(MongoCollectionNames.MessageReads);
 }

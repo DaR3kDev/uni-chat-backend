@@ -6,6 +6,9 @@ public static class EndpointExtensions
 {
     public static void MapEndpoints(this WebApplication app)
     {
+        // Authentication endpoints
+        app.MapLoginEndpoint();
         app.MapRegisterEndpoint();
+        app.MapMeEndpoint();
     }
 }

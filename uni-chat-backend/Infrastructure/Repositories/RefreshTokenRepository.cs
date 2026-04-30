@@ -11,10 +11,10 @@ public class RefreshTokenRepository(IMongoCollections mongoCollections) : IRefre
 
     public async Task CreateAsync(RefreshToken token) => await _collection.InsertOneAsync(token);
 
-    public async Task<RefreshToken?> GetByTokenAsync(string token) => await _collection
-                                        .Find(t => t.Token == token)
-                                        .FirstOrDefaultAsync();
-    public async Task UpdateAsync(RefreshToken token) => await _collection
-                                .ReplaceOneAsync(t => t.Id == token.Id, token);
+    public async Task ReplaceAsync(Guid userId, RefreshToken newToken)
+    {
+        await _collection.DeleteManyAsync(x => x.UserId == userId);
 
+        await _collection.InsertOneAsync(newToken);
+    }
 }
