@@ -6,6 +6,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using System.Security.Claims;
 using System.Text;
 using uni_chat_backend.Application.Behaviors;
 using uni_chat_backend.Infrastructure.Configuration;
@@ -25,23 +26,28 @@ public static class DependencyInjection
     {
         ArgumentNullException.ThrowIfNull(configuration);
 
-        // Configuración Mongo
+        // =========================
+        // MongoDB
+        // =========================
         BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
         services.Configure<MongoSettings>(configuration.GetSection("Mongo"));
 
-        // JWT + Seguridad
+        // =========================
+        // JWT / Refresh Token 
+        // =========================
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<RefreshTokenSettings>(configuration.GetSection("RefreshToken"));
-        services.Configure<Argon2Settings>(configuration.GetSection("Argon2"));
 
-        // Convertir IOptions → instancia directa
         services.AddSingleton(sp =>
             sp.GetRequiredService<IOptions<JwtSettings>>().Value);
 
         services.AddSingleton(sp =>
             sp.GetRequiredService<IOptions<RefreshTokenSettings>>().Value);
 
-        // MongoClient
+        // =========================
+        // Mongo Client
+        // =========================
         services.AddSingleton<IMongoClient>(sp =>
         {
             var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
@@ -52,29 +58,33 @@ public static class DependencyInjection
             return new MongoClient(settings.ConnectionString);
         });
 
-        // Contexto
         services.AddSingleton<MongoContext>();
         services.AddHostedService<MongoIndexesInitializerService>();
 
-        // Collections
         services.AddSingleton<IMongoCollections, MongoCollections>();
 
-        // Pipeline
+        // =========================
+        // MediatR Pipeline
+        // =========================
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
+        // =========================
         // Repositories
+        // =========================
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IContactRepository, ContactRepository>();
 
-        // HttpContext
         services.AddHttpContextAccessor();
 
-        // JWT Authentication
-        var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>();
-            
+        // =========================
+        // JWT AUTH (CORRECTO PARA SIGNALR)
+        // =========================
+        var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()
+            ?? throw new InvalidOperationException("Jwt settings missing");
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -85,29 +95,39 @@ public static class DependencyInjection
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
 
-                    ValidIssuer = jwtSettings!.Issuer,
+                    ValidIssuer = jwtSettings.Issuer,
                     ValidAudience = jwtSettings.Audience,
-
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSettings.Key)),
+                        Encoding.UTF8.GetBytes(jwtSettings.Key)
+                    ),
 
-                    NameClaimType = "sub"
+                    NameClaimType = ClaimTypes.NameIdentifier
+                };
+
+                // =========================
+                // SIGNALR
+                // =========================
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"].FirstOrDefault();
+
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
-        // Security Services
+        // =========================
+        // SECURITY SERVICES
+        // =========================
         services.AddSingleton<TokenService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-        //// Password hashing
-        //services.AddSingleton(sp =>
-        //{
-        //    var settings = sp.GetRequiredService<IOptions<Argon2Settings>>().Value;
-        //    return new Argon2PasswordHasher(settings);
-        //});
-
-        //// Otros servicios
-        //services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         return services;
     }

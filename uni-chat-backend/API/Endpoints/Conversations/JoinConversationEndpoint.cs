@@ -10,11 +10,11 @@ public static class JoinConversationEndpoint
         app.MapPost("/api/conversations/{conversationId:guid}/join", async (
             Guid conversationId,
             IMediator mediator,
-            CancellationToken ct) =>
+            CancellationToken cancellationToken) =>
         {
             var result = await mediator.Send(
                 new JoinConversationCommand(conversationId),
-                ct
+                cancellationToken
             );
 
             return Results.Ok(result);

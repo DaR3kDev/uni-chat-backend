@@ -3,6 +3,7 @@ using Scalar.AspNetCore;
 using System.Reflection;
 using uni_chat_backend.API.Extensions;
 using uni_chat_backend.Infrastructure;
+using uni_chat_backend.Infrastructure.Realtime;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,12 +14,17 @@ builder.Services.AddCors(options =>
     options.AddPolicy("CorsPolicy", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "http://localhost:3000")
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:3000"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
+
+builder.Services.AddSignalR();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
@@ -47,8 +53,10 @@ app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCustomMiddlewares();
+app.MapHub<ChatHub>("/messages/chat");
 
 app.MapEndpoints();
+
+app.UseCustomMiddlewares();
 
 app.Run();

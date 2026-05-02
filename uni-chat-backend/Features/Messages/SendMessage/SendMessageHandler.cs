@@ -56,7 +56,7 @@ public class SendMessageHandler(
             message.Id,
             message.ConversationId,
             message.SenderId,
-            message.Content,
+            request.Content,
             message.CreatedAt,
             Delivered: false
         );

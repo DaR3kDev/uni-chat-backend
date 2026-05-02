@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using uni_chat_backend.API.Exceptions;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
@@ -16,15 +17,16 @@ public class AddContactHandler(
         var ownerUserId = currentUser.UserId
             ?? throw new UnauthorizedAccessException("No autorizado");
 
-        var contactUser = await userRepository.GetByPhoneAsync(request.Phone) ?? throw new KeyNotFoundException("Usuario no encontrado");
+        var contactUser = await userRepository.GetByPhoneAsync(request.Phone) ?? throw new NotFoundException("Usuario no encontrado");
         
         if (contactUser.Id == ownerUserId)
-            throw new InvalidOperationException("No puedes agregarte a ti mismo como contacto");
+            throw new BadRequestException("No puedes agregarte a ti mismo como contacto");
 
         var exists = await contactRepository.ExistsAsync(ownerUserId, contactUser.Id);
 
         if (exists)
-            throw new InvalidOperationException("El contacto ya existe");
+            throw new BadRequestException("El contacto ya existe");
+
 
         var contact = new Contact
         {

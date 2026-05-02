@@ -52,6 +52,7 @@ public class GetOrCreateConversationHandler(
             )
         };
 
+      
         await conversationRepository.CreateAsync(newConversation);
 
         return new ConversationDto(

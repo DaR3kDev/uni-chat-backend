@@ -1,4 +1,5 @@
 ﻿using uni_chat_backend.Domain.Entities;
+using uni_chat_backend.Domain.Enums;
 
 namespace uni_chat_backend.Infrastructure.Repositories.Interfaces;
 
@@ -14,9 +15,11 @@ public interface IMessageRepository
     );
 
     Task MarkAsDeletedAsync(Guid messageId);
- 
+
     Task<int> MarkConversationAsReadAsync(
         Guid conversationId,
         Guid userId
     );
+
+    Task UpdateStatusAsync(Guid messageId, MessageStatus status);
 }

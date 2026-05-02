@@ -19,14 +19,21 @@ public class MessageRepository(IMongoCollections mongoCollections) : IMessageRep
             .Find(m => m.Id == messageId)
             .FirstOrDefaultAsync();
 
-    public async Task<List<Message>> GetByConversationIdAsync(Guid conversationId, int limit = 50) =>
-        await _messages
-            .Find(m => m.ConversationId == conversationId && !m.IsDeleted)
+    public async Task<List<Message>> GetByConversationIdAsync(Guid conversationId, int limit = 50)
+    {
+        var messages = await _messages
+            .Find(m =>
+                m.ConversationId == conversationId &&
+                !m.IsDeleted
+            )
             .SortByDescending(m => m.CreatedAt)
             .Limit(limit)
             .ToListAsync();
 
-        public async Task MarkAsDeletedAsync(Guid messageId) =>
+        return [.. messages.OrderBy(m => m.CreatedAt)];
+    }
+
+    public async Task MarkAsDeletedAsync(Guid messageId) =>
             await _messages.UpdateOneAsync(
                 m => m.Id == messageId,
                 Builders<Message>.Update.Set(m => m.IsDeleted, true)
@@ -53,5 +60,16 @@ public class MessageRepository(IMongoCollections mongoCollections) : IMessageRep
         await readsCollection.InsertManyAsync(reads);
 
         return reads.Count;
+    }
+
+    public async Task UpdateStatusAsync(Guid messageId,MessageStatus status)
+    {
+        var update = Builders<Message>.Update
+            .Set(x => x.Status, status);
+
+        await _messages.UpdateOneAsync(
+            x => x.Id == messageId,
+            update
+        );
     }
 }

@@ -2,8 +2,11 @@
 
 public record GetConversationsResult
 (
-    Guid Id,
+    Guid ConversationId,
     Guid ContactUserId,
+    string? Username,
+    bool IsOnline,
+    DateTime? LastSeen,
     DateTime CreatedAt,
     DateTime? LastMessageAt
 );

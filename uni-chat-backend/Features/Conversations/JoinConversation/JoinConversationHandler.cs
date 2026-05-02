@@ -13,7 +13,7 @@ public class JoinConversationHandler(
         JoinConversationCommand request,
         CancellationToken cancellationToken)
     {
-        var userId = currentUser.UserId
+         var userId = currentUser.UserId
             ?? throw new UnauthorizedAccessException("No autorizado");
 
         var isMember = await conversationRepository.IsUserInConversationAsync(
