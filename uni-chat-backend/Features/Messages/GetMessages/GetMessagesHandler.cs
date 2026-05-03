@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
@@ -33,7 +34,12 @@ public class GetMessagesHandler(
             m.Id,
             m.ConversationId,
             m.SenderId,
-            E2EEncryptionService.Decrypt(m.Content!, aesKey),
+            m.Type == MessageType.TEXT && m.Content != null
+                ? E2EEncryptionService.Decrypt(m.Content, aesKey)
+                : null,
+            m.FileUrl,
+            m.FileName,
+            m.Type,
             m.CreatedAt
         ))];
     }

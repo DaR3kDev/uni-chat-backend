@@ -17,6 +17,7 @@ using uni_chat_backend.Infrastructure.Repositories;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
+using uni_chat_backend.Infrastructure.Services;
 
 namespace uni_chat_backend.Infrastructure;
 
@@ -25,12 +26,11 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-
+            
         // =========================
         // MongoDB
         // =========================
         BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
-
         services.Configure<MongoSettings>(configuration.GetSection("Mongo"));
 
         // =========================
@@ -38,6 +38,7 @@ public static class DependencyInjection
         // =========================
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<RefreshTokenSettings>(configuration.GetSection("RefreshToken"));
+        services.Configure<CloudinarySettings>(configuration.GetSection("Cloudinary"));
 
         services.AddSingleton(sp =>
             sp.GetRequiredService<IOptions<JwtSettings>>().Value);
@@ -128,6 +129,11 @@ public static class DependencyInjection
         // =========================
         services.AddSingleton<TokenService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+        // =========================
+        // CLOUDINARY SERVICE
+        // =========================
+        services.AddSingleton<CloudinaryService>();
 
         return services;
     }
