@@ -44,7 +44,7 @@ public class RefreshHandler(
         var newAccessToken = _tokenService.GenerateAccessToken(user);
         var newRefreshToken = _tokenService.GenerateRefreshToken(user.Id);
 
-        await refreshTokenRepository.RevokeAllByUserIdAsync(user.Id);
+        await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id);
         await _refreshTokenRepository.CreateAsync(newRefreshToken);
         
         var db = _redis.GetDatabase();
