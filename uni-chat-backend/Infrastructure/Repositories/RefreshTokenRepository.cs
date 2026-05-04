@@ -16,13 +16,6 @@ public class RefreshTokenRepository(IMongoCollections mongoCollections) : IRefre
          .Find(x => x.Token == token)
          .FirstOrDefaultAsync();
 
-    public async Task UpdateAsync(RefreshToken token)=>
-        await _collection.ReplaceOneAsync(
-            x => x.Id == token.Id,
-            token
-        );
-    
-
     public async Task RevokeAsync(Guid id, string? replacedByToken = null)
     {
         var update = Builders<RefreshToken>.Update
@@ -30,6 +23,21 @@ public class RefreshTokenRepository(IMongoCollections mongoCollections) : IRefre
             .Set(x => x.RevokedAt, DateTime.UtcNow)
             .Set(x => x.ReplacedByToken, replacedByToken);
 
-        await _collection.UpdateOneAsync(x => x.Id == id, update);
+        await _collection.UpdateOneAsync(
+            x => x.Id == id,
+            update
+        );
+    }
+
+    public async Task RevokeAllByUserIdAsync(Guid userId)
+    {
+        var update = Builders<RefreshToken>.Update
+            .Set(x => x.IsRevoked, true)
+            .Set(x => x.RevokedAt, DateTime.UtcNow);
+
+        await _collection.UpdateManyAsync(
+            x => x.UserId == userId && !x.IsRevoked,
+            update
+        );
     }
 }

@@ -18,8 +18,14 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
     <PackageReference Include="MongoDB.Bson" Version="3.8.0" />
     <PackageReference Include="MongoDB.Driver" Version="3.8.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.14.9" />
+    <PackageReference Include="StackExchange.Redis" Version="2.12.14" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Infrastructure\SignalR\" />
   </ItemGroup>
 
 </Project>

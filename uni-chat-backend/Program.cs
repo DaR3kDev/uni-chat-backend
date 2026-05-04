@@ -2,9 +2,9 @@ using FluentValidation;
 using Scalar.AspNetCore;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using uni_chat_backend.API.Endpoints.Hubs;
 using uni_chat_backend.API.Extensions;
-using uni_chat_backend.Infrastructure;
-using uni_chat_backend.Infrastructure.Realtime;
+using uni_chat_backend.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 

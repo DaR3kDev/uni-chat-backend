@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using uni_chat_backend.API.Exceptions;
+using uni_chat_backend.Application.Common.Exceptions;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security.Interfaces;

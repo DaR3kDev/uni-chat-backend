@@ -6,9 +6,8 @@ using System.Security.Claims;
 using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Features.Messages.SendMessage;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
-using uni_chat_backend.Infrastructure.Services;
 
-namespace uni_chat_backend.Infrastructure.Realtime;
+namespace uni_chat_backend.API.Endpoints.Hubs;
 
 [Authorize]
 public class ChatHub(
