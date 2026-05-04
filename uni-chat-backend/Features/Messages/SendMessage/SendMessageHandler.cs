@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.SignalR;
 using uni_chat_backend.Domain.Entities;
+using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
@@ -20,28 +20,31 @@ public class SendMessageHandler(
         var senderId = currentUser.UserId
             ?? throw new UnauthorizedAccessException("Usuario no autenticado");
 
-        var conversation = await conversationRepository
-            .GetByIdAsync(request.ConversationId) ?? throw new InvalidOperationException("Conversación no existe");
+        var conversation = await conversationRepository.GetByIdAsync(request.ConversationId)
+            ?? throw new InvalidOperationException("Conversación no existe");
 
         if (!conversation.Participants.Any(p => p.UserId == senderId && !p.IsBanned))
             throw new InvalidOperationException("No perteneces a esta conversación");
 
-        if (string.IsNullOrWhiteSpace(request.Content))
-            throw new HubException("El mensaje no puede estar vacío");
-
-        var key = await conversationRepository.GetEncryptionKeyAsync(request.ConversationId);
-
-        var encryptedContent = E2EEncryptionService.Encrypt(
-            request.Content,
-            Convert.FromBase64String(key)
-        );
+        string? encryptedContent = null;
+        if (request.Type == MessageType.TEXT && !string.IsNullOrWhiteSpace(request.Content))
+        {
+            var key = await conversationRepository.GetEncryptionKeyAsync(request.ConversationId);
+            encryptedContent = E2EEncryptionService.Encrypt(
+                request.Content,
+                Convert.FromBase64String(key)
+            );
+        }
 
         var message = new Message
         {
             Id = Guid.NewGuid(),
             ConversationId = request.ConversationId,
             SenderId = senderId,
-            Content = encryptedContent,
+            Content = encryptedContent, 
+            FileUrl = request.FileUrl, 
+            FileName = request.FileName, 
+            Type = request.Type,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -56,9 +59,11 @@ public class SendMessageHandler(
             message.Id,
             message.ConversationId,
             message.SenderId,
-            request.Content,
-            message.CreatedAt,
-            Delivered: false
+            request.Content,   
+            request.FileUrl, 
+            request.FileName, 
+            message.Type,
+            message.CreatedAt
         );
     }
 }

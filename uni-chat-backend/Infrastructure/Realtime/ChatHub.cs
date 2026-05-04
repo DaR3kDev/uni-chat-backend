@@ -1,10 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using MongoDB.Driver;
 using System.Security.Claims;
 using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Features.Messages.SendMessage;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
+using uni_chat_backend.Infrastructure.Services;
 
 namespace uni_chat_backend.Infrastructure.Realtime;
 
@@ -22,18 +24,14 @@ public class ChatHub(
     public override async Task OnConnectedAsync()
     {
         var userId = GetUserIdOrThrow();
-
         await _conversationRepository.SetUserOnlineAsync(userId);
-
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var userId = GetUserIdOrThrow();
-
         await _conversationRepository.SetUserOfflineAsync(userId);
-
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -59,26 +57,41 @@ public class ChatHub(
         });
     }
 
-    public async Task SendMessage(Guid conversationId, string content)
+    public async Task SendMessage(Guid conversationId, string? content, string? fileUrl, string? fileName, MessageType? type)
     {
         var senderId = GetUserIdOrThrow();
 
-        var result = await _mediator.Send(new SendMessageCommand(
+        if (string.IsNullOrWhiteSpace(content) && string.IsNullOrWhiteSpace(fileUrl))
+            throw new HubException("El mensaje está vacío");
+
+        var command = new SendMessageCommand(
             conversationId,
-            content
-        ));
+            content,
+            fileUrl,
+            fileName,
+            type ?? MessageType.TEXT
+        );
+
+        var message = await _mediator.Send(command);
 
         await Clients.Group(conversationId.ToString())
             .SendAsync("ReceiveMessage", new
             {
-                id = result.MessageId,
-                conversationId = result.ConversationId,
-                senderId = result.SenderId,
-                content = result.Content,
-                createdAt = result.CreatedAt,
+                id = message.MessageId,
+                conversationId = message.ConversationId,
+                senderId = message.SenderId,
+                content = message.Content,
+                fileUrl = message.FileUrl,
+                fileName = message.FileName,
+                createdAt = message.CreatedAt,
                 status = "sent",
-                type = "text"
+                type = message.Type.ToString().ToUpper()
             });
+    }
+
+    public async Task LeaveConversation(Guid conversationId)
+    {
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
     }
 
     public async Task TypingStarted(Guid conversationId)
@@ -86,12 +99,7 @@ public class ChatHub(
         var userId = GetUserIdOrThrow();
 
         await Clients.Group(conversationId.ToString())
-            .SendAsync("UserTyping", new
-            {
-                conversationId,
-                userId,
-                isTyping = true
-            });
+            .SendAsync("UserTyping", new { conversationId, userId, isTyping = true });
     }
 
     public async Task TypingStopped(Guid conversationId)
@@ -99,26 +107,25 @@ public class ChatHub(
         var userId = GetUserIdOrThrow();
 
         await Clients.Group(conversationId.ToString())
-            .SendAsync("UserTyping", new
-            {
-                conversationId,
-                userId,
-                isTyping = false
-            });
+            .SendAsync("UserTyping", new { conversationId, userId, isTyping = false });
     }
 
-    public async Task MessageReceived(Guid messageId, Guid conversationId)
+    public async Task MessageDelivered(Guid messageId, Guid conversationId)
     {
         var userId = GetUserIdOrThrow();
-
         await _messageRepository.UpdateStatusAsync(messageId, MessageStatus.DELIVERED);
 
         await Clients.Group(conversationId.ToString())
-            .SendAsync("MessageDelivered", new
-            {
-                messageId,
-                userId
-            });
+            .SendAsync("MessageDelivered", new { messageId, userId });
+    }
+
+    public async Task MessageRead(Guid messageId, Guid conversationId)
+    {
+        var userId = GetUserIdOrThrow();
+        await _messageRepository.UpdateStatusAsync(messageId, MessageStatus.READ);
+
+        await Clients.Group(conversationId.ToString())
+            .SendAsync("MessageRead", new { messageId, userId });
     }
 
     private Guid GetUserIdOrThrow()
