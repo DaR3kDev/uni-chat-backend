@@ -1,0 +1,182 @@
+---
+title: Backend
+description: Documentacion tecnica del backend de Uni Chat.
+sidebar_position: 2
+slug: /backend
+---
+
+<div className="docHero">
+  <h1>Uni Chat Backend</h1>
+  <div>
+    API de chat en tiempo real con ASP.NET Core, autenticacion JWT, mensajeria
+    asincrona y persistencia distribuida.
+  </div>
+  <div className="docBadgeRow">
+    <span className="docBadge">.NET 10</span>
+    <span className="docBadge">SignalR</span>
+    <span className="docBadge">MongoDB</span>
+    <span className="docBadge">Redis</span>
+    <span className="docBadge">RabbitMQ</span>
+  </div>
+</div>
+
+<div className="docGrid">
+  <div className="docCard">
+    <h3>Responsabilidad</h3>
+    <div>Gestiona autenticacion, conversaciones, mensajes y eventos de tiempo real.</div>
+  </div>
+  <div className="docCard">
+    <h3>Objetivo tecnico</h3>
+    <div>Escalar con baja latencia y mantener seguridad extremo a extremo.</div>
+  </div>
+</div>
+
+## Descripcion funcional
+
+<div className="docSectionCard">
+  <div>La API cubre:</div>
+  <ul>
+    <li>Autenticacion de usuarios (registro, login, refresh, logout, perfil).</li>
+    <li>Gestion de contactos.</li>
+    <li>Conversaciones directas.</li>
+    <li>Envio/consulta de mensajes (texto y archivos).</li>
+    <li>Eventos realtime (typing, delivered, read).</li>
+  </ul>
+</div>
+
+## Stack tecnologico
+
+<div className="docGrid">
+  <div className="docCard"><strong>Runtime</strong><div>.NET 10 (`net10.0`)</div></div>
+  <div className="docCard"><strong>Framework</strong><div>ASP.NET Core Minimal API + SignalR</div></div>
+  <div className="docCard"><strong>Persistencia</strong><div>MongoDB + Cloudinary</div></div>
+  <div className="docCard"><strong>Infra</strong><div>Redis + RabbitMQ</div></div>
+  <div className="docCard"><strong>Arquitectura</strong><div>MediatR + FluentValidation + Mapster</div></div>
+  <div className="docCard"><strong>Documentacion</strong><div>OpenAPI + Scalar</div></div>
+</div>
+
+## Estructura principal
+
+<div className="docSectionCard">
+  <div>Directorio <code>uni-chat-backend/</code>:</div>
+  <ul>
+    <li><code>API/</code>: endpoints HTTP, hub y middlewares.</li>
+    <li><code>Application/</code>: comportamientos transversales.</li>
+    <li><code>Domain/</code>: entidades y enums.</li>
+    <li><code>Features/</code>: casos de uso por modulo.</li>
+    <li><code>Infrastructure/</code>: persistencia, seguridad y DI.</li>
+    <li><code>Program.cs</code>: composicion de servicios.</li>
+  </ul>
+</div>
+
+## Requisitos previos
+
+- .NET SDK 10
+- Docker + Docker Compose
+
+## Configuracion local
+
+1. Copiar variables de entorno:
+
+```bash
+cd uni-chat-backend
+cp .env.example .env
+```
+
+2. Configurar `appsettings.json`:
+
+<div className="docSectionCard">
+  <ul>
+    <li><code>Mongo.ConnectionString</code></li>
+    <li><code>Mongo.Database</code></li>
+    <li><code>Redis.ConnectionString</code></li>
+    <li><code>Jwt.Key</code>, <code>Jwt.Issuer</code>, <code>Jwt.Audience</code></li>
+    <li><code>RefreshToken.ExpireDays</code></li>
+    <li><code>Cloudinary.CloudName</code>, <code>Cloudinary.ApiKey</code>, <code>Cloudinary.ApiSecret</code></li>
+  </ul>
+</div>
+
+## Levantar dependencias
+
+```bash
+docker compose up -d
+```
+
+:::info Dependencias locales
+Servicios: MongoDB, Redis, RabbitMQ y paneles de administracion asociados.
+:::
+
+## Ejecutar API
+
+```bash
+dotnet restore
+dotnet run
+```
+
+URLs locales: `http://localhost:5012` y `https://localhost:7155`.
+
+## Endpoints principales
+
+### Auth
+
+| Metodo | Endpoint |
+| --- | --- |
+| `POST` | `/api/auth/register` |
+| `POST` | `/api/auth/login` |
+| `GET` | `/api/auth/me` |
+| `POST` | `/api/auth/refresh` |
+| `POST` | `/api/auth/logout` |
+
+### Contacts
+
+| Metodo | Endpoint |
+| --- | --- |
+| `POST` | `/api/contacts` |
+| `GET` | `/api/contacts` |
+| `DELETE` | `/api/contacts/{contactId:guid}` |
+
+### Conversations
+
+| Metodo | Endpoint |
+| --- | --- |
+| `POST` | `/api/conversations/direct` |
+| `GET` | `/api/conversations` |
+| `POST` | `/api/conversations/{conversationId:guid}/join` |
+
+### Messages
+
+| Metodo | Endpoint |
+| --- | --- |
+| `POST` | `/api/messages/send` |
+| `POST` | `/api/messages/upload` |
+| `GET` | `/api/messages/conversation/{conversationId:guid}` |
+| `DELETE` | `/api/messages/{messageId:guid}` |
+
+## Realtime con SignalR
+
+- Hub: `/messages/chat`
+- Requiere autenticacion (`[Authorize]`)
+
+<div className="docSectionCard">
+  <div>
+    Metodos clave: <code>JoinConversation</code>, <code>SendMessage</code>,{' '}
+    <code>TypingStarted</code>, <code>TypingStopped</code>,{' '}
+    <code>MessageDelivered</code>, <code>MessageRead</code>.
+  </div>
+</div>
+
+## Flujo recomendado de inicio
+
+<div className="docTimeline">
+  <div className="docTimelineItem"><strong>1.</strong> <code>docker compose up -d</code></div>
+  <div className="docTimelineItem"><strong>2.</strong> Configurar <code>appsettings.json</code></div>
+  <div className="docTimelineItem"><strong>3.</strong> <code>dotnet run</code></div>
+  <div className="docTimelineItem"><strong>4.</strong> Registrar/login usuario</div>
+  <div className="docTimelineItem"><strong>5.</strong> Crear conversacion</div>
+  <div className="docTimelineItem"><strong>6.</strong> Enviar mensajes por HTTP o SignalR</div>
+</div>
+
+:::note Nota operativa
+No subas secretos reales (`.env`, JWT, credenciales Cloudinary) al repositorio.
+:::
+

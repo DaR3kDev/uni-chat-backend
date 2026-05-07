@@ -1,36 +1,71 @@
 ﻿using MediatR;
+using StackExchange.Redis;
+using System.Text.Json;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
+using uni_chat_backend.Application.Common.Exceptions;
 
 namespace uni_chat_backend.Features.Conversations.GetOrCreateDirect;
 
 public class GetOrCreateConversationHandler(
     IConversationRepository conversationRepository,
-    ICurrentUserService currentUser
+    ICurrentUserService currentUser,
+    IConnectionMultiplexer redis
 ) : IRequestHandler<GetOrCreateConversationCommand, ConversationDto>
 {
-    public async Task<ConversationDto> Handle(
-        GetOrCreateConversationCommand request,
-        CancellationToken ct)
+    private readonly IConversationRepository _conversationRepository = conversationRepository;
+    private readonly ICurrentUserService _currentUser = currentUser;
+    private readonly IConnectionMultiplexer _redis = redis;
+
+    public async Task<ConversationDto> Handle(GetOrCreateConversationCommand request, CancellationToken ct)
     {
-        var ownerUserId = currentUser.UserId
-            ?? throw new UnauthorizedAccessException("Usuario no autenticado");
+        var ownerUserId = _currentUser.UserId
+            ?? throw new UnauthorizedException("Usuario no autenticado");
 
-        var existingConversation = await conversationRepository.GetDirectConversationAsync(
-            ownerUserId,
-            request.ContactUserId
-        );
+        var db = _redis.GetDatabase();
 
-        if (existingConversation != null)
+        var cacheKey = $"conversation:direct:{ownerUserId}:{request.ContactUserId}";
+
+        var cachedConversation = await db.StringGetAsync(cacheKey);
+
+        if (cachedConversation.HasValue)
         {
-            return new ConversationDto(
+            var cachedJson = cachedConversation.ToString();
+
+            if (!string.IsNullOrWhiteSpace(cachedJson))
+            {
+                var cachedDto =
+                    JsonSerializer.Deserialize<ConversationDto>(cachedJson);
+
+                if (cachedDto is not null)
+                    return cachedDto;
+            }
+        }
+
+        var existingConversation =
+            await _conversationRepository.GetDirectConversationAsync(
+                ownerUserId,
+                request.ContactUserId
+            );
+
+        if (existingConversation is not null)
+        {
+            var existingDto = new ConversationDto(
                 existingConversation.Id,
                 request.ContactUserId,
                 existingConversation.CreatedAt,
                 existingConversation.LastMessageAt
             );
+
+            await db.StringSetAsync(
+                cacheKey,
+                JsonSerializer.Serialize(existingDto),
+                TimeSpan.FromMinutes(10)
+            );
+
+            return existingDto;
         }
 
         var conversationId = Guid.NewGuid();
@@ -43,8 +78,15 @@ public class GetOrCreateConversationHandler(
 
             Participants =
             [
-                new ConversationParticipant { UserId = ownerUserId },
-                new ConversationParticipant { UserId = request.ContactUserId }
+                new ConversationParticipant
+                {
+                    UserId = ownerUserId
+                },
+
+                new ConversationParticipant
+                {
+                    UserId = request.ContactUserId
+                }
             ],
 
             EncryptionKey = Convert.ToBase64String(
@@ -52,14 +94,23 @@ public class GetOrCreateConversationHandler(
             )
         };
 
-      
-        await conversationRepository.CreateAsync(newConversation);
+        await _conversationRepository.CreateAsync(newConversation);
 
-        return new ConversationDto(
+        var response = new ConversationDto(
             conversationId,
             request.ContactUserId,
             newConversation.CreatedAt,
             null
         );
+
+        await db.StringSetAsync(
+            cacheKey,
+            JsonSerializer.Serialize(response),
+            TimeSpan.FromMinutes(10)
+        );
+
+        await db.KeyDeleteAsync($"conversations:{ownerUserId}");
+
+        return response;
     }
 }

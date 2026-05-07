@@ -7,7 +7,7 @@ using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Features.Messages.SendMessage;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 
-namespace uni_chat_backend.API.Endpoints.Hubs;
+namespace uni_chat_backend.Infrastructure.SignalR;
 
 [Authorize]
 public class ChatHub(
@@ -42,7 +42,7 @@ public class ChatHub(
             ?? throw new HubException("Conversación no existe");
 
         var isParticipant = conversation.Participants
-            .Any(p => p.UserId == userId && !p.IsBanned);
+                .Any(p => p.UserId == userId && !p.IsBanned);
 
         if (!isParticipant)
             throw new HubException("No perteneces a esta conversación");
