@@ -23,7 +23,7 @@ const config = {
   url: 'https://dar3kdev.github.io',
   // nombre del repo
   baseUrl: '/uni-chat-backend/',
-
+  trailingSlash: false,
   onBrokenLinks: 'throw',
 
   // GitHub Pages
