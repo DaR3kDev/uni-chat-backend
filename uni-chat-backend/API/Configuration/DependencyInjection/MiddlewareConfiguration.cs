@@ -6,14 +6,8 @@ namespace uni_chat_backend.API.Configuration.DependencyInjection;
 
 public static class MiddlewareConfiguration
 {
-    public static WebApplication UseApiMiddleware(this WebApplication app)
+    public static void UseApiMiddleware(this WebApplication app)
     {
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi();
-            app.MapScalarApiReference();
-        }
-
         app.UseHttpsRedirection();
 
         app.UseRouting();
@@ -26,7 +20,5 @@ public static class MiddlewareConfiguration
         app.UseMiddleware<RequestIdMiddleware>();
 
         app.UseCustomMiddlewares();
-
-        return app;
     }
 }

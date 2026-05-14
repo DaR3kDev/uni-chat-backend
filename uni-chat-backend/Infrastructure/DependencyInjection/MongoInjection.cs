@@ -16,25 +16,18 @@ public static class MongoInjection
         // =========================================================
         // BSON SERIALIZATION
         // =========================================================
-        BsonSerializer.RegisterSerializer(
-            new GuidSerializer(GuidRepresentation.Standard)
-        );
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
         // =========================================================
         // MONGO CLIENT
         // =========================================================
         services.AddSingleton<IMongoClient>(sp =>
         {
-            var settings = sp
-                .GetRequiredService<IOptions<MongoSettings>>()
-                .Value;
+            var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
 
-            if (string.IsNullOrWhiteSpace(settings.ConnectionString))
-                throw new InvalidOperationException(
-                    "Mongo ConnectionString is not configured"
-                );
-
-            return new MongoClient(settings.ConnectionString);
+            return string.IsNullOrWhiteSpace(settings.ConnectionString)
+                ? throw new InvalidOperationException("Mongo ConnectionString is not configured")
+                : new MongoClient(settings.ConnectionString);
         });
 
         // =========================================================

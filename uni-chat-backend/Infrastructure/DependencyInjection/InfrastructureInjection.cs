@@ -1,8 +1,4 @@
 ﻿using uni_chat_backend.Features.Auth;
-using uni_chat_backend.Features.Auth.Login;
-using uni_chat_backend.Features.Auth.Logout;
-using uni_chat_backend.Features.Auth.Me;
-using uni_chat_backend.Features.Auth.Register;
 
 namespace uni_chat_backend.Infrastructure.DependencyInjection;
 

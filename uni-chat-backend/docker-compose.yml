@@ -1,6 +1,45 @@
-﻿version: "3.9"
+﻿services:
 
-services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uni-chat-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+
+      Mongo__ConnectionString: ${MONGO_CONNECTION_STRING}
+      Mongo__Database: ${MONGO_DATABASE}
+
+      Redis__ConnectionString: ${REDIS_CONNECTION_STRING}
+      RabbitMQ__ConnectionString: ${RABBITMQ_CONNECTION_STRING}
+
+      Jwt__Key: ${JWT_KEY}
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__ExpireMinutes: ${JWT_EXPIRE_MINUTES}
+
+      RefreshToken__ExpireDays: ${REFRESH_EXPIRE_DAYS}
+
+      Cloudinary__CloudName: ${CLOUDINARY_CLOUD_NAME}
+      Cloudinary__ApiKey: ${CLOUDINARY_API_KEY}
+      Cloudinary__ApiSecret: ${CLOUDINARY_API_SECRET}
+
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+
+    networks:
+      - backend-net
+
   mongodb:
     image: mongo:latest
     container_name: mongodb
@@ -10,23 +49,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    volumes:
-      - mongo_data:/data/db
-
-  mongo-express:
-    image: mongo-express:latest
-    container_name: mongo-express
-    restart: unless-stopped
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASS}
-    depends_on:
-      - mongodb
+    networks:
+      - backend-net
 
   redis:
     image: redis:7-alpine
@@ -34,18 +58,8 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command: [ "redis-server", "--appendonly", "yes" ]
-    volumes:
-      - redis_data:/data
-
-  redisinsight:
-    image: redis/redisinsight:latest
-    container_name: redisinsight
-    restart: unless-stopped
-    ports:
-      - "5540:5540"
-    depends_on:
-      - redis
+    networks:
+      - backend-net
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -57,21 +71,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend-net
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: redis-commander
-    restart: unless-stopped
-    ports:
-      - "8082:8081"
-    environment:
-      REDIS_HOSTS: local:redis:6379
-    depends_on:
-      - redis
-
-volumes:
-  mongo_data:
-  redis_data:
-  rabbitmq_data:
+networks:
+  backend-net:

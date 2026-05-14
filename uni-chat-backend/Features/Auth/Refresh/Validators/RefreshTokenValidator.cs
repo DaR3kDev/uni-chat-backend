@@ -12,10 +12,7 @@ public class RefreshTokenValidator(IRefreshTokenRepository refreshTokenRepositor
         var storedToken = await refreshTokenRepository.GetByTokenAsync(token) ??
                           throw new UnauthorizedException("Refresh token inválido");
 
-        if (storedToken.IsRevoked)
-        {
-            throw new UnauthorizedException("Refresh token revocado");
-        }
+        if (storedToken.IsRevoked) throw new UnauthorizedException("Refresh token revocado");
 
         return storedToken.ExpiresAt < DateTime.UtcNow
             ? throw new UnauthorizedException("Refresh token expirado")
