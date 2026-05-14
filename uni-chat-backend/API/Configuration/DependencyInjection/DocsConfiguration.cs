@@ -12,11 +12,7 @@ public static class DocsConfiguration
 
         if (!enableDocs) return;
 
-        app.MapOpenApi("/openapi/v1.json");
-
-        app.MapScalarApiReference(options =>
-        {
-            options.WithOpenApiRoutePattern("/openapi/v1.json");
-        });
+        app.MapOpenApi();
+        app.MapScalarApiReference();
     }
 }

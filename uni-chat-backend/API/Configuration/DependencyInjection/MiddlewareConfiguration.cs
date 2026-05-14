@@ -1,5 +1,4 @@
-﻿using Scalar.AspNetCore;
-using uni_chat_backend.API.Extensions;
+﻿using uni_chat_backend.API.Extensions;
 using uni_chat_backend.API.Middleware;
 
 namespace uni_chat_backend.API.Configuration.DependencyInjection;
@@ -18,6 +17,8 @@ public static class MiddlewareConfiguration
         app.UseAuthorization();
 
         app.UseMiddleware<RequestIdMiddleware>();
+
+        app.MapEndpoints();
 
         app.UseCustomMiddlewares();
     }
