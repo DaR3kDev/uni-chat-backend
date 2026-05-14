@@ -6,4 +6,3 @@ public class ApiResponse
     public string Message { get; set; } = string.Empty;
     public object? Errors { get; set; }
 }
-

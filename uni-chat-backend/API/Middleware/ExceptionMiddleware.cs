@@ -38,7 +38,7 @@ public class ExceptionMiddleware(RequestDelegate next)
 
         if (ex is BadRequestException br && br.Errors is not null)
             response.Errors = br.Errors;
-        
+
         await context.Response.WriteAsync(
             JsonSerializer.Serialize(response)
         );
