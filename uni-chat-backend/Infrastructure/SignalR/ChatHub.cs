@@ -1,8 +1,7 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using MongoDB.Driver;
-using System.Security.Claims;
 using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Features.Messages.SendMessage;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
@@ -16,8 +15,8 @@ public class ChatHub(
     IMessageRepository messageRepository
 ) : Hub
 {
-    private readonly IMediator _mediator = mediator;
     private readonly IConversationRepository _conversationRepository = conversationRepository;
+    private readonly IMediator _mediator = mediator;
     private readonly IMessageRepository _messageRepository = messageRepository;
 
     public override async Task OnConnectedAsync()
@@ -39,10 +38,10 @@ public class ChatHub(
         var userId = GetUserIdOrThrow();
 
         var conversation = await _conversationRepository.GetByIdAsync(conversationId)
-            ?? throw new HubException("Conversación no existe");
+                           ?? throw new HubException("Conversación no existe");
 
         var isParticipant = conversation.Participants
-                .Any(p => p.UserId == userId && !p.IsBanned);
+            .Any(p => p.UserId == userId && !p.IsBanned);
 
         if (!isParticipant)
             throw new HubException("No perteneces a esta conversación");
@@ -56,7 +55,8 @@ public class ChatHub(
         });
     }
 
-    public async Task SendMessage(Guid conversationId, string? content, string? fileUrl, string? fileName, MessageType? type)
+    public async Task SendMessage(Guid conversationId, string? content, string? fileUrl, string? fileName,
+        MessageType? type)
     {
         var senderId = GetUserIdOrThrow();
 

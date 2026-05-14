@@ -5,8 +5,6 @@ namespace uni_chat_backend.Infrastructure.Persistence;
 
 public class MongoContext
 {
-    public IMongoDatabase Database { get; }
-
     public MongoContext(IMongoClient client, IOptions<MongoSettings> options)
     {
         var settings = options.Value;
@@ -16,4 +14,6 @@ public class MongoContext
 
         Database = client.GetDatabase(settings.Database);
     }
+
+    public IMongoDatabase Database { get; }
 }

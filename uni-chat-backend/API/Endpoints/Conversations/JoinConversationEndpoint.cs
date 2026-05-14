@@ -8,18 +8,18 @@ public static class JoinConversationEndpoint
     public static void MapJoinConversationEndpoint(this IEndpointRouteBuilder app)
     {
         app.MapPost("/api/conversations/{conversationId:guid}/join", async (
-            Guid conversationId,
-            IMediator mediator,
-            CancellationToken cancellationToken) =>
-        {
-            var result = await mediator.Send(
-                new JoinConversationCommand(conversationId),
-                cancellationToken
-            );
+                Guid conversationId,
+                IMediator mediator,
+                CancellationToken cancellationToken) =>
+            {
+                var result = await mediator.Send(
+                    new JoinConversationCommand(conversationId),
+                    cancellationToken
+                );
 
-            return Results.Ok(result);
-        })
-        .WithTags("Conversations")
-        .RequireAuthorization();
+                return Results.Ok(result);
+            })
+            .WithTags("Conversations")
+            .RequireAuthorization();
     }
 }

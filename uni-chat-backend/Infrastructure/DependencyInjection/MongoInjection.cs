@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -12,9 +11,7 @@ namespace uni_chat_backend.Infrastructure.DependencyInjection;
 
 public static class MongoInjection
 {
-    public static IServiceCollection AddMongoDatabase(
-        this IServiceCollection services
-    )
+    public static void AddMongoDatabase(this IServiceCollection services)
     {
         // =========================================================
         // BSON SERIALIZATION
@@ -33,11 +30,9 @@ public static class MongoInjection
                 .Value;
 
             if (string.IsNullOrWhiteSpace(settings.ConnectionString))
-            {
                 throw new InvalidOperationException(
                     "Mongo ConnectionString is not configured"
                 );
-            }
 
             return new MongoClient(settings.ConnectionString);
         });
@@ -50,7 +45,5 @@ public static class MongoInjection
         services.AddSingleton<IMongoCollections, MongoCollections>();
 
         services.AddHostedService<MongoIndexesInitializerService>();
-
-        return services;
     }
 }

@@ -5,7 +5,7 @@ namespace uni_chat_backend.Infrastructure.DependencyInjection;
 
 public static class RepositoryInjection
 {
-    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    public static void AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -13,7 +13,5 @@ public static class RepositoryInjection
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IContactRepository, ContactRepository>();
         services.AddHttpContextAccessor();
-
-        return services;
     }
 }

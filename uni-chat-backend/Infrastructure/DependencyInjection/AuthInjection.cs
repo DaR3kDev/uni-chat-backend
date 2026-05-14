@@ -8,17 +8,15 @@ namespace uni_chat_backend.Infrastructure.DependencyInjection;
 
 public static class AuthenticationInjection
 {
-    public static IServiceCollection AddJwtAuthentication(
-        this IServiceCollection services,
-        IConfiguration configuration
-    )
+    public static void AddJwtAuthentication(this IServiceCollection services,
+        IConfiguration configuration)
     {
         var jwtSettings = configuration
-            .GetSection("Jwt")
-            .Get<JwtSettings>()
-            ?? throw new InvalidOperationException(
-                "Jwt settings missing"
-            );
+                              .GetSection("Jwt")
+                              .Get<JwtSettings>()
+                          ?? throw new InvalidOperationException(
+                              "Jwt settings missing"
+                          );
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -58,15 +56,11 @@ public static class AuthenticationInjection
 
                         if (!string.IsNullOrEmpty(accessToken) &&
                             path.StartsWithSegments("/messages/chat"))
-                        {
                             context.Token = accessToken;
-                        }
 
                         return Task.CompletedTask;
                     }
                 };
             });
-
-        return services;
     }
 }

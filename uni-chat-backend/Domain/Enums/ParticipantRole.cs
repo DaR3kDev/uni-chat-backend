@@ -5,4 +5,3 @@ public enum ParticipantRole
     MEMBER,
     ADMIN
 }
-

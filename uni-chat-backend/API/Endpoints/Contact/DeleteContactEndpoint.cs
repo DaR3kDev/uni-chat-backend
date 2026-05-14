@@ -8,21 +8,21 @@ public static class DeleteContactEndpoint
     public static void MapDeleteContactEndpoint(this IEndpointRouteBuilder app)
     {
         app.MapDelete("/api/contacts/{contactId:guid}", async (
-            Guid contactId,
-            IMediator mediator,
-            CancellationToken cancellationToken) =>
-        {
-            var result = await mediator.Send(
-                new DeleteContactCommand(contactId),
-                cancellationToken
-            );
-
-            return Results.Ok(new
+                Guid contactId,
+                IMediator mediator,
+                CancellationToken cancellationToken) =>
             {
-                message = result
-            });
-        })
-        .WithTags("Contacts")
-        .RequireAuthorization();
+                var result = await mediator.Send(
+                    new DeleteContactCommand(contactId),
+                    cancellationToken
+                );
+
+                return Results.Ok(new
+                {
+                    message = result
+                });
+            })
+            .WithTags("Contacts")
+            .RequireAuthorization();
     }
 }

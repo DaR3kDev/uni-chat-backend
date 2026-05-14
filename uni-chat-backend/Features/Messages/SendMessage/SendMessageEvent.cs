@@ -2,8 +2,7 @@
 
 namespace uni_chat_backend.Features.Messages.SendMessage;
 
-public sealed record SendMessageEvent
-(
+public sealed record SendMessageEvent(
     Guid MessageId,
     Guid ConversationId,
     Guid SenderId,

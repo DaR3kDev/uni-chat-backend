@@ -6,9 +6,9 @@ public record GetMessagesResult(
     Guid MessageId,
     Guid ConversationId,
     Guid SenderId,
-    string? Content,     
-    string? FileUrl,    
-    string? FileName,    
-    MessageType Type,     
+    string? Content,
+    string? FileUrl,
+    string? FileName,
+    MessageType Type,
     DateTime CreatedAt
 );

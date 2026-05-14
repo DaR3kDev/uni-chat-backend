@@ -9,4 +9,3 @@ public interface IRefreshTokenRepository
     Task RevokeAsync(Guid id, string? replacedByToken = null);
     Task RevokeAllByUserIdAsync(Guid userId);
 }
-

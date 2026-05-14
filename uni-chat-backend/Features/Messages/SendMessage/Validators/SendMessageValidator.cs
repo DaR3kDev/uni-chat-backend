@@ -25,24 +25,24 @@ public class SendMessageValidator : AbstractValidator<SendMessageCommand>
 
         // Validación para archivos (IMAGE, FILE, VIDEO, AUDIO)
         When(x => x.Type == MessageType.IMAGE
-               || x.Type == MessageType.FILE
-               || x.Type == MessageType.VIDEO
-               || x.Type == MessageType.AUDIO, () =>
-               {
-                   RuleFor(x => x.FileUrl)
-                       .NotEmpty().WithMessage("La URL del archivo es obligatoria");
+                  || x.Type == MessageType.FILE
+                  || x.Type == MessageType.VIDEO
+                  || x.Type == MessageType.AUDIO, () =>
+        {
+            RuleFor(x => x.FileUrl)
+                .NotEmpty().WithMessage("La URL del archivo es obligatoria");
 
-                   RuleFor(x => x.FileName)
-                       .NotEmpty().WithMessage("El nombre del archivo es obligatorio");
-               });
+            RuleFor(x => x.FileName)
+                .NotEmpty().WithMessage("El nombre del archivo es obligatorio");
+        });
 
         // Validación para tipos inválidos
         RuleFor(x => x.Type)
             .Must(t => t == MessageType.TEXT
-                      || t == MessageType.IMAGE
-                      || t == MessageType.FILE
-                      || t == MessageType.VIDEO
-                      || t == MessageType.AUDIO)
+                       || t == MessageType.IMAGE
+                       || t == MessageType.FILE
+                       || t == MessageType.VIDEO
+                       || t == MessageType.AUDIO)
             .WithMessage("Tipo de mensaje no válido");
     }
 }

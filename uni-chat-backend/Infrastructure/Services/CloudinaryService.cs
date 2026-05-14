@@ -12,20 +12,20 @@ public class CloudinaryService
     public CloudinaryService(IOptions<CloudinarySettings> options)
     {
         var settings = options.Value
-            ?? throw new ArgumentNullException(nameof(options), "La configuración de Cloudinary no se encontró.");
+                       ?? throw new ArgumentNullException(nameof(options),
+                           "La configuración de Cloudinary no se encontró.");
 
         if (string.IsNullOrWhiteSpace(settings.CloudName) ||
             string.IsNullOrWhiteSpace(settings.ApiKey) ||
             string.IsNullOrWhiteSpace(settings.ApiSecret))
-        {
-            throw new ArgumentException("La configuración de Cloudinary es inválida. Verifica CloudName, ApiKey y ApiSecret.");
-        }
+            throw new ArgumentException(
+                "La configuración de Cloudinary es inválida. Verifica CloudName, ApiKey y ApiSecret.");
 
         _cloudinary = new Cloudinary(new Account(settings.CloudName, settings.ApiKey, settings.ApiSecret));
     }
 
     /// <summary>
-    /// Sube cualquier archivo (imagen, video, audio o genérico) a Cloudinary y devuelve la URL segura.
+    ///     Sube cualquier archivo (imagen, video, audio o genérico) a Cloudinary y devuelve la URL segura.
     /// </summary>
     public async Task<string> UploadFileAsync(IFormFile file)
     {
@@ -33,7 +33,7 @@ public class CloudinaryService
 
         await using var stream = file.OpenReadStream();
 
-        string folder = file.ContentType?.ToLowerInvariant() switch
+        var folder = file.ContentType?.ToLowerInvariant() switch
         {
             var t when t!.StartsWith("image/") => "chat/images",
             var t when t!.StartsWith("video/") => "chat/videos",
@@ -64,7 +64,8 @@ public class CloudinaryService
         var result = await _cloudinary.UploadAsync(uploadParams);
 
         if (result?.SecureUrl == null)
-            throw new Exception($"Error al subir el archivo a Cloudinary: {result?.Error?.Message ?? "Error desconocido"}");
+            throw new Exception(
+                $"Error al subir el archivo a Cloudinary: {result?.Error?.Message ?? "Error desconocido"}");
 
         return result.SecureUrl.ToString();
     }

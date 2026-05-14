@@ -11,8 +11,7 @@ public class RefreshToken
 
     public string Token { get; set; } = default!;
 
-    [BsonRepresentation(BsonType.String)]
-    public Guid UserId { get; set; }
+    [BsonRepresentation(BsonType.String)] public Guid UserId { get; set; }
 
     public DateTime ExpiresAt { get; set; }
 
@@ -24,4 +23,3 @@ public class RefreshToken
 
     public string? ReplacedByToken { get; set; }
 }
-

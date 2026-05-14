@@ -8,18 +8,18 @@ public static class DeleteMessageEndpoint
     public static void MapDeleteMessageEndpoint(this IEndpointRouteBuilder app)
     {
         app.MapDelete("/api/messages/{messageId:guid}",
-            async (
-                Guid messageId,
-                IMediator mediator,
-                CancellationToken cancellationToken
-            ) =>
-            {
-                var command = new DeleteMessageCommand(messageId);
+                async (
+                    Guid messageId,
+                    IMediator mediator,
+                    CancellationToken cancellationToken
+                ) =>
+                {
+                    var command = new DeleteMessageCommand(messageId);
 
-                await mediator.Send(command, cancellationToken);
+                    await mediator.Send(command, cancellationToken);
 
-                return Results.NoContent();
-            })
+                    return Results.NoContent();
+                })
             .WithName("DeleteMessage")
             .WithTags("Messages")
             .RequireAuthorization();

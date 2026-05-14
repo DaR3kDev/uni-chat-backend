@@ -17,21 +17,21 @@ public sealed class SendMessageHandler(
     IMessageBus bus
 ) : IRequestHandler<SendMessageCommand, SendMessageResult>
 {
-    private readonly IMessageRepository _messageRepository = messageRepository;
+    private readonly IMessageBus _bus = bus;
     private readonly IConversationRepository _conversationRepository = conversationRepository;
     private readonly ICurrentUserService _currentUser = currentUser;
+    private readonly IMessageRepository _messageRepository = messageRepository;
     private readonly IConnectionMultiplexer _redis = redis;
-    private readonly IMessageBus _bus = bus;
 
     public async Task<SendMessageResult> Handle(
         SendMessageCommand request,
         CancellationToken cancellationToken)
     {
         var senderId = _currentUser.UserId ??
-            throw new UnauthorizedAccessException("Usuario no autenticado");
+                       throw new UnauthorizedAccessException("Usuario no autenticado");
 
         var conversation = await _conversationRepository.GetByIdAsync(request.ConversationId) ??
-            throw new InvalidOperationException("Conversación no existe");
+                           throw new InvalidOperationException("Conversación no existe");
 
         var isParticipant = conversation.Participants.Any(p =>
             p.UserId == senderId &&

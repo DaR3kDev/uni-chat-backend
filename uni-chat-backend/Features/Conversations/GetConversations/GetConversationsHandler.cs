@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using System.Text.Json;
+using MediatR;
 using StackExchange.Redis;
-using System.Text.Json;
 using uni_chat_backend.Application.Common.Exceptions;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
@@ -19,7 +19,7 @@ public class GetConversationsHandler(
         CancellationToken cancellationToken)
     {
         var userId = currentUser.UserId
-            ?? throw new UnauthorizedException("No autorizado");
+                     ?? throw new UnauthorizedException("No autorizado");
 
         var db = redis.GetDatabase();
         var cacheKey = $"conversations:{userId}";

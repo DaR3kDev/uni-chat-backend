@@ -24,4 +24,3 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
             .WithMessage("El teléfono debe estar en formato internacional, ejemplo: +573001234567");
     }
 }
-

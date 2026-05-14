@@ -3,7 +3,8 @@ using uni_chat_backend.Infrastructure.Services;
 
 namespace uni_chat_backend.Features.Messages.UploadFile;
 
-public class UploadFileHandler(CloudinaryService cloudinaryService) : IRequestHandler<UploadFileCommand, UploadFileResult>
+public class UploadFileHandler(CloudinaryService cloudinaryService)
+    : IRequestHandler<UploadFileCommand, UploadFileResult>
 {
     private readonly CloudinaryService _cloudinaryService = cloudinaryService;
 

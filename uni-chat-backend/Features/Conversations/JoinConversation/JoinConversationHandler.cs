@@ -21,7 +21,7 @@ public class JoinConversationHandler(
         CancellationToken cancellationToken)
     {
         var userId = _currentUser.UserId
-            ?? throw new UnauthorizedException("No autorizado");
+                     ?? throw new UnauthorizedException("No autorizado");
 
         var isMember =
             await _conversationRepository.IsUserInConversationAsync(

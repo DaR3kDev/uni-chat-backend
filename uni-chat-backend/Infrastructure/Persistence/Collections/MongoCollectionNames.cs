@@ -10,4 +10,3 @@ public static class MongoCollectionNames
     public const string MessageDeliveries = "message_deliveries";
     public const string MessageReads = "message_reads";
 }
-

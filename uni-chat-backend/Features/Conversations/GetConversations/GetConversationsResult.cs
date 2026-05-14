@@ -1,7 +1,6 @@
 ﻿namespace uni_chat_backend.Features.Conversations.GetConversations;
 
-public record GetConversationsResult
-(
+public record GetConversationsResult(
     Guid ConversationId,
     Guid ContactUserId,
     string? Username,
@@ -10,4 +9,3 @@ public record GetConversationsResult
     DateTime CreatedAt,
     DateTime? LastMessageAt
 );
-

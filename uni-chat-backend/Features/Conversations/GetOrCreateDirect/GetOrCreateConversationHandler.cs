@@ -1,11 +1,11 @@
-﻿using MediatR;
+﻿using System.Text.Json;
+using MediatR;
 using StackExchange.Redis;
-using System.Text.Json;
+using uni_chat_backend.Application.Common.Exceptions;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
-using uni_chat_backend.Application.Common.Exceptions;
 
 namespace uni_chat_backend.Features.Conversations.GetOrCreateDirect;
 
@@ -22,7 +22,7 @@ public class GetOrCreateConversationHandler(
     public async Task<ConversationDto> Handle(GetOrCreateConversationCommand request, CancellationToken ct)
     {
         var ownerUserId = _currentUser.UserId
-            ?? throw new UnauthorizedException("Usuario no autenticado");
+                          ?? throw new UnauthorizedException("Usuario no autenticado");
 
         var db = _redis.GetDatabase();
 

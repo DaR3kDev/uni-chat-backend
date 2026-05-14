@@ -2,10 +2,8 @@
 
 public static class SignalRInjection
 {
-    public static IServiceCollection AddSignalRServices(this IServiceCollection services)
+    public static void AddSignalRServices(this IServiceCollection services)
     {
         services.AddSignalR();
-
-        return services;
     }
 }

@@ -2,11 +2,17 @@
 
 public class BadRequestException : AppException
 {
-    public object? Errors { get; }
-
     public BadRequestException(string message)
-        : base(message, 400) => Errors = null;
+        : base(message, 400)
+    {
+        Errors = null;
+    }
 
     public BadRequestException(Dictionary<string, string[]> errors)
-        : base("Validation error", 400) => Errors = errors;
+        : base("Validation error", 400)
+    {
+        Errors = errors;
+    }
+
+    public object? Errors { get; }
 }

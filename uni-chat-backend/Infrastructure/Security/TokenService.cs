@@ -1,8 +1,8 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Infrastructure.Configuration;
 
@@ -16,7 +16,7 @@ public class TokenService(JwtSettings jwt, RefreshTokenSettings refresh)
     public string GenerateAccessToken(User user)
     {
         var keyString = _jwt.Key
-            ?? throw new Exception("JWT Key no configurada");
+                        ?? throw new Exception("JWT Key no configurada");
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(keyString)
@@ -33,9 +33,9 @@ public class TokenService(JwtSettings jwt, RefreshTokenSettings refresh)
         };
 
         var token = new JwtSecurityToken(
-            issuer: _jwt.Issuer,
-            audience: _jwt.Audience,
-            claims: claims,
+            _jwt.Issuer,
+            _jwt.Audience,
+            claims,
             expires: DateTime.UtcNow.AddMinutes(_jwt.ExpireMinutes),
             signingCredentials: creds
         );

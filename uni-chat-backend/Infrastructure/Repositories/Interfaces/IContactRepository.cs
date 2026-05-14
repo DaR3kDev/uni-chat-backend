@@ -14,6 +14,5 @@ public interface IContactRepository
 
     Task DeleteAsync(Guid contactId);
 
-    Task<List<Contact>> GetByOwnerPagedAsync(Guid ownerUserId,int page,int pageSize,string? search);
+    Task<List<Contact>> GetByOwnerPagedAsync(Guid ownerUserId, int page, int pageSize, string? search);
 }
-

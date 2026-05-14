@@ -8,16 +8,20 @@ namespace uni_chat_backend.Infrastructure.Repositories;
 
 public class MessageRepository(IMongoCollections mongoCollections) : IMessageRepository
 {
-    private readonly IMongoCollections _mongoCollections = mongoCollections;
     private readonly IMongoCollection<Message> _messages = mongoCollections.Messages;
+    private readonly IMongoCollections _mongoCollections = mongoCollections;
 
-    public async Task CreateAsync(Message message) =>
+    public async Task CreateAsync(Message message)
+    {
         await _messages.InsertOneAsync(message);
+    }
 
-    public async Task<Message?> GetByIdAsync(Guid messageId) =>
-        await _messages
+    public async Task<Message?> GetByIdAsync(Guid messageId)
+    {
+        return await _messages
             .Find(m => m.Id == messageId)
             .FirstOrDefaultAsync();
+    }
 
     public async Task<List<Message>> GetByConversationIdAsync(Guid conversationId, int limit = 50)
     {
@@ -33,11 +37,13 @@ public class MessageRepository(IMongoCollections mongoCollections) : IMessageRep
         return [.. messages.OrderBy(m => m.CreatedAt)];
     }
 
-    public async Task MarkAsDeletedAsync(Guid messageId) =>
-            await _messages.UpdateOneAsync(
-                m => m.Id == messageId,
-                Builders<Message>.Update.Set(m => m.IsDeleted, true)
-            );
+    public async Task MarkAsDeletedAsync(Guid messageId)
+    {
+        await _messages.UpdateOneAsync(
+            m => m.Id == messageId,
+            Builders<Message>.Update.Set(m => m.IsDeleted, true)
+        );
+    }
 
     public async Task<int> MarkConversationAsReadAsync(Guid conversationId, Guid userId)
     {
@@ -62,7 +68,7 @@ public class MessageRepository(IMongoCollections mongoCollections) : IMessageRep
         return reads.Count;
     }
 
-    public async Task UpdateStatusAsync(Guid messageId,MessageStatus status)
+    public async Task UpdateStatusAsync(Guid messageId, MessageStatus status)
     {
         var update = Builders<Message>.Update
             .Set(x => x.Status, status);

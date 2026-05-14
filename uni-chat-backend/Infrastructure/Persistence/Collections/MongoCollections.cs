@@ -1,6 +1,5 @@
 ﻿using MongoDB.Driver;
 using uni_chat_backend.Domain.Entities;
-using uni_chat_backend.Infrastructure.Persistence;
 
 namespace uni_chat_backend.Infrastructure.Persistence.Collections;
 

@@ -8,6 +8,7 @@ public class MessageDelivery
     [BsonId]
     [BsonRepresentation(BsonType.String)]
     public Guid Id { get; set; }
+
     public Guid MessageId { get; set; }
     public Guid UserId { get; set; }
     public DateTime DeliveredAt { get; set; }

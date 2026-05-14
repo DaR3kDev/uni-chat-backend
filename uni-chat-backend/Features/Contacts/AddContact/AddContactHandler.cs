@@ -19,10 +19,10 @@ public class AddContactHandler(
         CancellationToken cancellationToken)
     {
         var ownerUserId = currentUser.UserId
-            ?? throw new UnauthorizedException("No autorizado");
+                          ?? throw new UnauthorizedException("No autorizado");
 
         var contactUser = await userRepository.GetByPhoneAsync(request.Phone)
-            ?? throw new NotFoundException("Usuario no encontrado");
+                          ?? throw new NotFoundException("Usuario no encontrado");
 
         if (contactUser.Id == ownerUserId)
             throw new BadRequestException("No puedes agregarte a ti mismo como contacto");

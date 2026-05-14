@@ -12,8 +12,8 @@ public class DeleteMessageHandler(
     IConnectionMultiplexer redis
 ) : IRequestHandler<DeleteMessageCommand>
 {
-    private readonly IMessageRepository _messageRepository = messageRepository;
     private readonly ICurrentUserService _currentUser = currentUser;
+    private readonly IMessageRepository _messageRepository = messageRepository;
     private readonly IConnectionMultiplexer _redis = redis;
 
     public async Task Handle(
@@ -21,10 +21,10 @@ public class DeleteMessageHandler(
         CancellationToken cancellationToken)
     {
         var userId = _currentUser.UserId
-            ?? throw new UnauthorizedException("No autenticado");
+                     ?? throw new UnauthorizedException("No autenticado");
 
         var message = await _messageRepository.GetByIdAsync(request.MessageId)
-            ?? throw new NotFoundException("Mensaje no existe");
+                      ?? throw new NotFoundException("Mensaje no existe");
 
         if (message.SenderId != userId)
             throw new ForbiddenException("No puedes eliminar este mensaje");

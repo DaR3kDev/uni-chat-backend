@@ -6,4 +6,3 @@ public record AddContactCommand(
     string Phone,
     string? Alias
 ) : IRequest<string>;
-

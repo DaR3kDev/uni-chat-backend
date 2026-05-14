@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Infrastructure.Persistence.Collections;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
@@ -9,8 +10,10 @@ public class ContactRepository(IMongoCollections mongoCollections) : IContactRep
 {
     private readonly IMongoCollection<Contact> _contacts = mongoCollections.Contacts;
 
-    public Task CreateAsync(Contact contact) =>
-        _contacts.InsertOneAsync(contact);
+    public Task CreateAsync(Contact contact)
+    {
+        return _contacts.InsertOneAsync(contact);
+    }
 
     public async Task<bool> ExistsAsync(Guid ownerUserId, Guid contactUserId)
     {
@@ -27,12 +30,10 @@ public class ContactRepository(IMongoCollections mongoCollections) : IContactRep
         var filter = Builders<Contact>.Filter.Eq(x => x.OwnerUserId, ownerUserId);
 
         if (!string.IsNullOrEmpty(search))
-        {
             filter = Builders<Contact>.Filter.And(
                 filter,
-                Builders<Contact>.Filter.Regex("Alias", new MongoDB.Bson.BsonRegularExpression(search, "i"))
+                Builders<Contact>.Filter.Regex("Alias", new BsonRegularExpression(search, "i"))
             );
-        }
 
         return await _contacts
             .Find(filter)
@@ -41,16 +42,22 @@ public class ContactRepository(IMongoCollections mongoCollections) : IContactRep
             .ToListAsync();
     }
 
-    public Task<List<Contact>> GetByOwnerAsync(Guid ownerUserId) =>
-        _contacts
+    public Task<List<Contact>> GetByOwnerAsync(Guid ownerUserId)
+    {
+        return _contacts
             .Find(x => x.OwnerUserId == ownerUserId)
             .ToListAsync();
+    }
 
-    public async Task<Contact?> GetByIdAsync(Guid contactId) =>
-        await _contacts
+    public async Task<Contact?> GetByIdAsync(Guid contactId)
+    {
+        return await _contacts
             .Find(x => x.Id == contactId)
             .FirstOrDefaultAsync();
+    }
 
-    public Task DeleteAsync(Guid contactId) =>
-        _contacts.DeleteOneAsync(x => x.Id == contactId);
+    public Task DeleteAsync(Guid contactId)
+    {
+        return _contacts.DeleteOneAsync(x => x.Id == contactId);
+    }
 }

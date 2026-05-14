@@ -1,14 +1,11 @@
-﻿
-using StackExchange.Redis;
+﻿using StackExchange.Redis;
 
 namespace uni_chat_backend.Infrastructure.DependencyInjection;
 
 public static class RedisInjection
 {
-    public static IServiceCollection AddRedis(
-        this IServiceCollection services,
-        IConfiguration configuration
-    )
+    public static void AddRedis(this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddSingleton<IConnectionMultiplexer>(_ =>
         {
@@ -16,15 +13,11 @@ public static class RedisInjection
                 configuration["Redis:ConnectionString"];
 
             if (string.IsNullOrWhiteSpace(connectionString))
-            {
                 throw new InvalidOperationException(
                     "Redis ConnectionString is not configured"
                 );
-            }
 
             return ConnectionMultiplexer.Connect(connectionString);
         });
-
-        return services;
     }
 }

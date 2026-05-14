@@ -2,8 +2,6 @@
 
 namespace uni_chat_backend.Features.Conversations.GetOrCreateDirect;
 
-public record GetOrCreateConversationCommand
-(
- Guid ContactUserId
+public record GetOrCreateConversationCommand(
+    Guid ContactUserId
 ) : IRequest<ConversationDto>;
-

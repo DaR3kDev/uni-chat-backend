@@ -7,19 +7,12 @@ public static class LogoutEndpoint
 {
     public static void MapLogoutEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/auth/logout", async (
-            IMediator mediator,
-            CancellationToken cancellationToken) =>
-        {
-            await mediator.Send(
-                new LogoutCommand(),
-                cancellationToken);
-
-            return Results.Ok(new
+        app.MapPost("/api/auth/logout", async (IMediator mediator, CancellationToken cancellationToken) =>
             {
-                message = "Cierre de sesión realizado correctamente"
-            });
-        })
-        .RequireAuthorization();
+                await mediator.Send(new LogoutCommand(), cancellationToken);
+
+                return Results.Ok(new { message = "Cierre de sesión realizado correctamente" });
+            })
+            .RequireAuthorization();
     }
 }

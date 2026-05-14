@@ -17,4 +17,3 @@ public class AddContactValidator : AbstractValidator<AddContactCommand>
             .WithMessage("El alias no puede superar los 30 caracteres");
     }
 }
-

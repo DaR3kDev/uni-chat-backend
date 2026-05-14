@@ -17,10 +17,10 @@ public class DeleteContactHandler(
         CancellationToken cancellationToken)
     {
         var ownerUserId = currentUser.UserId
-            ?? throw new UnauthorizedException("No autorizado");
+                          ?? throw new UnauthorizedException("No autorizado");
 
         var contact = await contactRepository.GetByIdAsync(request.ContactId)
-            ?? throw new NotFoundException("Contacto no encontrado");
+                      ?? throw new NotFoundException("Contacto no encontrado");
 
         if (contact.OwnerUserId != ownerUserId)
             throw new ForbiddenException("No tienes permiso para eliminar este contacto");

@@ -10,25 +10,33 @@ public class ConversationRepository(IMongoCollections mongoCollections) : IConve
     private readonly IMongoCollection<Conversation> _conversations = mongoCollections.Conversations;
     private readonly IMongoCollection<User> _users = mongoCollections.Users;
 
-    public async Task CreateAsync(Conversation conversation) =>
+    public async Task CreateAsync(Conversation conversation)
+    {
         await _conversations.InsertOneAsync(conversation);
+    }
 
-    public async Task<Conversation?> GetByIdAsync(Guid id) =>
-       await _conversations
+    public async Task<Conversation?> GetByIdAsync(Guid id)
+    {
+        return await _conversations
             .Find(c => c.Id == id)
             .FirstOrDefaultAsync();
+    }
 
-    public Task<List<Conversation>> GetUserConversationsAsync(Guid userId) =>
-        _conversations
+    public Task<List<Conversation>> GetUserConversationsAsync(Guid userId)
+    {
+        return _conversations
             .Find(c => c.Participants.Any(p => p.UserId == userId))
             .SortByDescending(c => c.LastMessageAt)
             .ToListAsync();
+    }
 
-    public async Task UpdateLastMessageAsync(Guid conversationId, DateTime date) =>
+    public async Task UpdateLastMessageAsync(Guid conversationId, DateTime date)
+    {
         await _conversations.UpdateOneAsync(
             c => c.Id == conversationId,
             Builders<Conversation>.Update.Set(c => c.LastMessageAt, date)
         );
+    }
 
     public async Task<bool> IsUserInConversationAsync(Guid conversationId, Guid userId)
     {
@@ -40,19 +48,23 @@ public class ConversationRepository(IMongoCollections mongoCollections) : IConve
             .Any(p => p.UserId == userId && !p.IsBanned) ?? false;
     }
 
-    public async Task SetUserOnlineAsync(Guid userId) =>
+    public async Task SetUserOnlineAsync(Guid userId)
+    {
         await _users.UpdateOneAsync(
             u => u.Id == userId,
             Builders<User>.Update.Set(u => u.IsOnline, true)
         );
+    }
 
-    public async Task SetUserOfflineAsync(Guid userId) =>
+    public async Task SetUserOfflineAsync(Guid userId)
+    {
         await _users.UpdateOneAsync(
             u => u.Id == userId,
             Builders<User>.Update
                 .Set(u => u.IsOnline, false)
                 .Set(u => u.LastSeen, DateTime.UtcNow)
         );
+    }
 
     public async Task<string> GetEncryptionKeyAsync(Guid conversationId)
     {
@@ -66,8 +78,9 @@ public class ConversationRepository(IMongoCollections mongoCollections) : IConve
         return conversation.EncryptionKey;
     }
 
-    public async Task<Conversation?> GetDirectConversationAsync(Guid userId1, Guid userId2) =>
-         await _conversations
+    public async Task<Conversation?> GetDirectConversationAsync(Guid userId1, Guid userId2)
+    {
+        return await _conversations
             .Find(c =>
                 !c.IsGroup &&
                 c.Participants != null &&
@@ -76,6 +89,5 @@ public class ConversationRepository(IMongoCollections mongoCollections) : IConve
                 c.Participants.Count == 2
             )
             .FirstOrDefaultAsync();
-
-
+    }
 }

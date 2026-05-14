@@ -9,4 +9,3 @@ public class RefreshTokenSettings
     public DateTime ExpiresAt { get; set; }
     public bool IsRevoked { get; set; }
 }
-

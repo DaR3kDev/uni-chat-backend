@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using System.Text.Json;
+using MediatR;
 using StackExchange.Redis;
-using System.Text.Json;
 using uni_chat_backend.Application.Common.Exceptions;
 using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
@@ -16,9 +16,9 @@ public class GetMessagesHandler(
     IConnectionMultiplexer redis
 ) : IRequestHandler<GetMessagesQuery, List<GetMessagesResult>>
 {
-    private readonly IMessageRepository _messageRepository = messageRepository;
     private readonly IConversationRepository _conversationRepository = conversationRepository;
     private readonly ICurrentUserService _currentUser = currentUser;
+    private readonly IMessageRepository _messageRepository = messageRepository;
     private readonly IConnectionMultiplexer _redis = redis;
 
     public async Task<List<GetMessagesResult>> Handle(
@@ -26,7 +26,7 @@ public class GetMessagesHandler(
         CancellationToken cancellationToken)
     {
         var userId = _currentUser.UserId
-            ?? throw new UnauthorizedException("No autenticado");
+                     ?? throw new UnauthorizedException("No autenticado");
 
         var db = _redis.GetDatabase();
 
@@ -49,14 +49,14 @@ public class GetMessagesHandler(
         }
 
         var conversation = await _conversationRepository.GetByIdAsync(request.ConversationId)
-            ?? throw new NotFoundException("Conversación no existe");
-        
+                           ?? throw new NotFoundException("Conversación no existe");
+
         if (!conversation.Participants.Any(p => p.UserId == userId))
             throw new ForbiddenException("No perteneces a esta conversación");
 
         var messages = await _messageRepository.GetByConversationIdAsync(request.ConversationId);
 
-        var key =await _conversationRepository.GetEncryptionKeyAsync(request.ConversationId);
+        var key = await _conversationRepository.GetEncryptionKeyAsync(request.ConversationId);
 
         var aesKey = Convert.FromBase64String(key);
 
