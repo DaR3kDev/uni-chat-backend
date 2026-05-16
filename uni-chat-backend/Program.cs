@@ -1,15 +1,18 @@
 using Serilog;
+using Serilog.Exceptions;
 using uni_chat_backend.API.Configuration.DependencyInjection;
-using uni_chat_backend.API.Extensions;
 using uni_chat_backend.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
     .Enrich.FromLogContext()
-    .Enrich.WithProperty("Application", "uni-chat-backend")
+    .Enrich.WithMachineName()
+    .Enrich.WithExceptionDetails()
+    .Enrich.WithThreadId()
     .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5341")
+    .WriteTo.Seq("http://seq:80")
     .CreateLogger();
 
 builder.Host.UseSerilog();

@@ -7,7 +7,7 @@ public static class MiddlewareConfiguration
 {
     public static void UseApiMiddleware(this WebApplication app)
     {
-        app.UseHttpsRedirection();
+        if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
         app.UseRouting();
 

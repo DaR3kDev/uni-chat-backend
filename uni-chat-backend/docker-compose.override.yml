@@ -23,19 +23,6 @@
     depends_on:
       - redis
 
-  seq:
-    image: datalust/seq:latest
-    container_name: seq
-    restart: unless-stopped
-    ports:
-      - "5341:80"
-    environment:
-      ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_ADMINUSERNAME: ${SEQ_ADMIN}
-      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD}
-    volumes:
-      - seq_data:/data
-
   dozzle:
     image: amir20/dozzle:latest
     container_name: dozzle

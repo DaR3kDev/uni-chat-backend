@@ -5,7 +5,8 @@ public static class CorsConfiguration
     private static readonly string[] AllowedOrigins =
     [
         "http://localhost:5173",
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "http://localhost:8080"
     ];
 
     public static void AddCorsConfiguration(this IServiceCollection services)
