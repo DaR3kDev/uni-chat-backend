@@ -4,10 +4,12 @@
 
 .DEFAULT_GOAL := help
 
-CSPROJ   := uni-chat-backend.csproj
-COMPOSE  := docker compose
-DOCS_DIR := ../docs
-DOTNET   := dotnet
+CSPROJ     := uni-chat-backend.csproj
+COMPOSE    := docker compose
+DOCS_DIR   := ../docs
+DOTNET     := dotnet
+IMAGE_NAME ?= ghcr.io/dar3kdev/uni-chat-backend
+IMAGE_TAG  ?= main
 
 # --- Funciones auxiliares para mensajes con emojis ---
 
@@ -46,6 +48,7 @@ endef
 
 .PHONY: help setup setup-interactive install restore build run watch clean clean-confirm \
         up down down-confirm restart logs ps ports docker-build docker-up \
+        docker-image docker-push docker-release \
         docs-install docs docs-build dev dev-watch menu
 
 # --- Ayuda ---
@@ -57,6 +60,7 @@ help: ## Muestra todos los comandos y sus descripciones en español
 	@echo ""
 	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make install$(COLOR_RESET) para una instalación completa"
 	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make ports$(COLOR_RESET) para ver todos los puertos"
+	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make docker-release$(COLOR_RESET) para construir y publicar la imagen"
 	@echo ""
 
 # --- Configuración ---
@@ -212,6 +216,38 @@ docker-up: ## Construye y levanta el stack completo, incluyendo la API (puerto 8
 	$(COMPOSE) up -d --build
 	@$(call print_success,"Stack levantado en http://localhost:8080")
 
+docker-image: ## Construye la imagen Docker con IMAGE_NAME e IMAGE_TAG configurables
+	@$(call print_header,"🐳 Construcción de Imagen Docker","═════════════════════════════════════════")
+	@$(call print_step,"🔍 ","Imagen destino: $(COLOR_BOLD)$(IMAGE_NAME):$(IMAGE_TAG)$(COLOR_RESET)")
+	@echo ""
+	@$(call print_step,"🔨","Construyendo imagen...")
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+	@echo ""
+	@$(call print_success,"Imagen construida: $(IMAGE_NAME):$(IMAGE_TAG)")
+	@echo ""
+	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make docker-push$(COLOR_RESET) para publicarla en el registro"
+	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) O usa $(COLOR_CYAN)make docker-release$(COLOR_RESET) para build + push en un solo paso"
+	@echo ""
+
+docker-push: ## Publica la imagen Docker en el registro (IMAGE_NAME e IMAGE_TAG configurables)
+	@$(call print_header,"📤 Publicación de Imagen Docker","═════════════════════════════════════════")
+	@$(call print_step,"🔍 ","Imagen a publicar: $(COLOR_BOLD)$(IMAGE_NAME):$(IMAGE_TAG)$(COLOR_RESET)")
+	@echo ""
+	@$(call print_step,"📤","Publicando imagen en el registro remoto...")
+	docker push $(IMAGE_NAME):$(IMAGE_TAG)
+	@echo ""
+	@$(call print_success,"Imagen publicada: $(IMAGE_NAME):$(IMAGE_TAG)")
+	@echo ""
+
+docker-release: docker-image docker-push ## Construye y publica la imagen en un solo paso (build + push)
+	@$(call print_header,"🚀 Release completado","═════════════════════════════════════════")
+	@echo "🎉 Imagen disponible en el registro:"
+	@echo "   $(COLOR_CYAN)$(IMAGE_NAME):$(IMAGE_TAG)$(COLOR_RESET)"
+	@echo ""
+	@echo "Para usarla:"
+	@echo "  docker pull $(IMAGE_NAME):$(IMAGE_TAG)"
+	@echo ""
+
 # --- Documentación (Docusaurus) ---
 
 docs-install: ## Instala las dependencias de la documentación con Bun
@@ -252,8 +288,10 @@ menu: ## Menú numerado en español para acciones frecuentes
 		echo "  5) Ejecutar API (run — bloqueante; mejor salir del menú antes)"; \
 		echo "  6) Crear .env si falta (setup)"; \
 		echo "  7) Detener stack con confirmación (down-confirm)"; \
+		echo "  8) Construir imagen Docker (docker-image)"; \
+		echo "  9) Build + Push imagen Docker (docker-release)"; \
 		echo "  0) Salir"; \
-		read -r -p "  Elige una opción [0-7]: " opt; \
+		read -r -p "  Elige una opción [0-9]: " opt; \
 		case "$$opt" in \
 			1) $(MAKE) help; ;; \
 			2) $(MAKE) up; ;; \
@@ -262,6 +300,10 @@ menu: ## Menú numerado en español para acciones frecuentes
 			5) echo "\033[33mLa API es bloqueante. Recomendado: otra terminal con \`make run\`.\033[0m"; read -r -p "¿Ejecutar aquí igualmente? [s/N]: " c; case "$$c" in s|S|si|Si|sí|Sí) $(MAKE) run ;; *) : ;; esac; ;; \
 			6) $(MAKE) setup; ;; \
 			7) $(MAKE) down-confirm; ;; \
+			8) read -r -p "  IMAGE_TAG (Enter para usar '$(IMAGE_TAG)'): " t; \
+			   if [ -n "$$t" ]; then $(MAKE) docker-image IMAGE_TAG="$$t"; else $(MAKE) docker-image; fi; ;; \
+			9) read -r -p "  IMAGE_TAG (Enter para usar '$(IMAGE_TAG)'): " t; \
+			   if [ -n "$$t" ]; then $(MAKE) docker-release IMAGE_TAG="$$t"; else $(MAKE) docker-release; fi; ;; \
 			0) echo "Hasta luego."; break ;; \
 			*) echo "Opción no válida." ;; \
 		esac; \
