@@ -157,21 +157,48 @@ Los valores de MongoDB deben coincidir con `MONGO_ROOT_*` y `MONGO_DATABASE` de 
 
 ## Inicio rápido
 
+### Opción 1: Instalación completa recomendada
+
+```bash
+cd uni-chat-backend
+
+make install  # Verifica dependencias, configura .env, restaura paquetes y compila
+# Edita .env y appsettings.json con tus credenciales
+
+make up       # MongoDB, Redis, RabbitMQ y paneles
+make run      # API en http://localhost:5012
+```
+
+### Opción 2: Instalación manual
+
 ```bash
 cd uni-chat-backend
 
 make setup
 # Edita .env y appsettings.json con tus credenciales
 
-make up      # MongoDB, Redis, RabbitMQ y paneles
-make run     # API en http://localhost:5012
+make up       # MongoDB, Redis, RabbitMQ y paneles
+make run      # API en http://localhost:5012
 ```
 
-O en un solo paso (después de configurar `.env` y `appsettings.json`):
+### Opción 3: Atajo de desarrollo
 
 ```bash
-make dev
+cd uni-chat-backend
+
+# Configura .env y appsettings.json primero
+make dev      # setup + up + run en un solo comando
 ```
+
+### Ver puertos de servicios
+
+Para ver todos los puertos disponibles:
+
+```bash
+make ports
+```
+
+Esto mostrará una tabla visual con los puertos de MongoDB, Redis, RabbitMQ, mongo-express, RedisInsight, Seq, Dozzle, Portainer y la API.
 
 **URLs locales (API en host):**
 
@@ -182,6 +209,142 @@ make dev
 | OpenAPI / Scalar | Disponible en entorno `Development` |
 
 **SignalR:** hub en `/messages/chat` (requiere JWT).
+
+---
+
+## Instalación desde Imagen Docker (GitHub Container Registry)
+
+El proyecto publica automáticamente una imagen Docker en **GitHub Container Registry (GHCR)** en cada push a la rama `main`. Esta opción es ideal para producción o cuando no necesitas modificar el código.
+
+### Ventajas de usar la imagen pre-construida
+
+- ✅ No requiere .NET SDK instalado
+- ✅ Build consistente en todos los entornos
+- ✅ Despliegue más rápido
+- ✅ Ideal para producción y staging
+- ✅ Imágenes versionadas con tags `latest` y SHA del commit
+
+### Paso 1: Autenticación en GHCR (opcional para imágenes públicas)
+
+Si la imagen es pública, puedes descargarla sin autenticación. Si es privada, necesitas autenticarte:
+
+```bash
+echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+```
+
+Para uso personal, puedes usar tu GitHub Personal Access Token.
+
+### Paso 2: Descargar la imagen
+
+```bash
+docker pull ghcr.io/DaR3kDev/uni-chat-backend:latest
+# O una versión específica:
+docker pull ghcr.io/DaR3kDev/uni-chat-backend:<commit-sha>
+```
+
+### Paso 3: Configurar variables de entorno
+
+Crea un archivo `.env` con las variables necesarias (igual que en desarrollo local):
+
+```bash
+MONGO_ROOT_USERNAME=admin
+MONGO_ROOT_PASSWORD=admin123
+MONGO_CONNECTION_STRING=mongodb://admin:admin123@mongodb:27017/?authSource=admin
+MONGO_DATABASE=unichat
+REDIS_CONNECTION_STRING=redis:6379
+RABBITMQ_USER=guest
+RABBITMQ_PASS=guest
+RABBITMQ_CONNECTION_STRING=amqp://guest:guest@rabbitmq:5672
+JWT_KEY=tu-clave-secreta-muy-larga-minimo-32-caracteres
+JWT_ISSUER=uni-chat
+JWT_AUDIENCE=uni-chat-users
+JWT_EXPIRE_MINUTES=15
+REFRESH_EXPIRE_DAYS=7
+CLOUDINARY_CLOUD_NAME=tu-cloud-name
+CLOUDINARY_API_KEY=tu-api-key
+CLOUDINARY_API_SECRET=tu-api-secret
+```
+
+### Paso 4: Ejecutar con docker-compose
+
+Crea un `docker-compose.yml` para producción:
+
+```yaml
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  api:
+    image: ghcr.io/DaR3kDev/uni-chat-backend:latest
+    container_name: uni-chat-api
+    restart: unless-stopped
+    environment:
+      - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - REDIS_CONNECTION_STRING=${REDIS_CONNECTION_STRING}
+      - RABBITMQ_CONNECTION_STRING=${RABBITMQ_CONNECTION_STRING}
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRE_MINUTES=${JWT_EXPIRE_MINUTES}
+      - REFRESH_EXPIRE_DAYS=${REFRESH_EXPIRE_DAYS}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+
+volumes:
+  mongodb_data:
+```
+
+Ejecuta el stack:
+
+```bash
+docker compose up -d
+```
+
+La API estará disponible en `http://localhost:8080`.
+
+### Verificar la imagen en GHCR
+
+1. Ve al repositorio en GitHub
+2. Haz clic en la pestaña "Packages"
+3. Busca el paquete `uni-chat-backend`
+4. Verás las versiones disponibles (latest y SHA)
 
 ---
 
@@ -201,6 +364,7 @@ make help
 | Comando | Descripción |
 |---------|-------------|
 | `help` | Muestra todos los comandos y sus descripciones en español |
+| `install` | Instalación completa con mensajes interactivos, emojis y registro de pasos |
 | `setup` | Crea `.env` desde `.env.example` si no existe |
 | `setup-interactive` | Si `.env` existe: omitir, respaldar y recrear, o salir |
 
@@ -225,6 +389,7 @@ make help
 | `restart` | `down` + `up` |
 | `logs` | Logs en tiempo real de todos los servicios |
 | `ps` | Estado de los contenedores |
+| `ports` | Muestra los puertos de los servicios Docker con tabla visual |
 | `docker-build` | Construye la imagen Docker de la API |
 | `docker-up` | Construye y levanta el stack completo (API en puerto 8080) |
 
@@ -262,6 +427,74 @@ make help
 
 ---
 
+## CI/CD con GitHub Actions
+
+El proyecto incluye un workflow automatizado de **CI/CD** que se ejecuta en GitHub Actions. Este workflow garantiza la calidad del código y automatiza el despliegue de la imagen Docker.
+
+### ¿Qué hace el workflow?
+
+El workflow se divide en dos jobs principales:
+
+#### 1. Job CI (Continuous Integration)
+- **Checkout**: Obtiene el código del repositorio
+- **Setup .NET**: Configura .NET SDK 10.0
+- **Restore**: Descarga las dependencias NuGet
+- **Build**: Compila el proyecto en configuración Release
+- **Test**: Ejecuta los tests unitarios (si existen)
+
+#### 2. Job Docker Build & Push
+- **Setup Docker Buildx**: Configura Docker para builds multi-plataforma
+- **Login a GHCR**: Se autentica en GitHub Container Registry usando `GITHUB_TOKEN`
+- **Build y Push**: Construye la imagen Docker y la publica en GHCR
+- **Tags**: Genera tags `latest` y el SHA del commit para trazabilidad
+- **Cache**: Usa cache de capas Docker para acelerar builds futuros
+
+### ¿Cuándo se ejecuta?
+
+El workflow se ejecuta automáticamente en los siguientes eventos:
+- **Push a rama `main`**: Ejecuta CI y publica la imagen en GHCR
+- **Pull requests a `main`**: Ejecuta solo CI (sin publicar imagen)
+
+### ¿Cómo ayuda al desarrollo?
+
+El workflow CI/CD proporciona múltiples beneficios:
+
+✅ **Detección temprana de errores**: Los errores de compilación y tests se detectan antes del merge
+
+✅ **Builds consistentes**: La imagen Docker se construye siempre en el mismo entorno, eliminando diferencias entre máquinas
+
+✅ **Automatización**: No necesitas construir manualmente la imagen Docker para producción
+
+✅ **Versionado**: Cada commit genera una imagen con su SHA, permitiendo rollback a versiones específicas
+
+✅ **Integración continua**: Garantiza que el código siempre compila y pasa tests antes de llegar a producción
+
+### Ver la ejecución del workflow
+
+1. Ve al repositorio en GitHub
+2. Haz clic en la pestaña "Actions"
+3. Verás el historial de ejecuciones del workflow
+4. Haz clic en una ejecución para ver los detalles, logs y artefactos
+
+### Usar la imagen generada en GHCR
+
+Después de cada push exitoso a `main`, la imagen está disponible en:
+
+```
+ghcr.io/DaR3kDev/uni-chat-backend:latest
+ghcr.io/DaR3kDev/uni-chat-backend:<commit-sha>
+```
+
+Para usarla, sigue la guía en la sección [Instalación desde Imagen Docker (GHCR)](#instalación-desde-imagen-docker-github-container-registry).
+
+### Configuración del workflow
+
+El archivo de configuración está en `.github/workflows/ci-cd-backend.yml`. El workflow usa:
+- `GITHUB_TOKEN`: Proporcionado automáticamente por GitHub (no requiere configuración manual)
+- Permisos: `contents: read` y `packages: write` para publicar en GHCR
+
+---
+
 ## Sin Makefile (Windows / alternativa)
 
 Desde la carpeta `uni-chat-backend/`:
@@ -290,6 +523,11 @@ Desde la carpeta `uni-chat-backend/`:
 | Docker no arranca o puerto en uso | `make ps` o `docker compose ps`; libera el puerto o `make down`. |
 | La API no conecta a MongoDB/Redis | Con `make run`, usa `localhost` en `appsettings.json`. Con `docker-up`, usa hosts `mongodb`, `redis`, `rabbitmq` en `.env`. |
 | `menu` o `*-confirm` no preguntan | Comprueba si `CI=true` está definido en el entorno. |
+| `make install` falla | Verifica que .NET SDK 10 y Docker estén instalados. Ejecuta `dotnet --version` y `docker --version`. |
+| Error al pull de imagen GHCR | Si la imagen es privada, autentícate: `echo $GITHUB_TOKEN \| docker login ghcr.io -u $GITHUB_ACTOR --password-stdin`. |
+| Workflow CI/CD falla | Ve a la pestaña "Actions" en GitHub para ver los logs del workflow. Verifica que el código compile localmente. |
+| Imagen no aparece en GHCR | Verifica que el workflow se haya ejecutado exitosamente en "Actions". Solo se publica en push a `main`. |
+| Error de autenticación en GHCR | Asegúrate de que el repositorio tenga los permisos correctos: `contents: read` y `packages: write`. |
 
 ---
 
