@@ -237,9 +237,9 @@ Para uso personal, puedes usar tu GitHub Personal Access Token.
 ### Paso 2: Descargar la imagen
 
 ```bash
-docker pull ghcr.io/DaR3kDev/uni-chat-backend:latest
+ghcr.io/dar3kdev/uni-chat-backend:main
 # O una versión específica:
-docker pull ghcr.io/DaR3kDev/uni-chat-backend:<commit-sha>
+ghcr.io/dar3kdev/uni-chat-backend:<commit-sha>
 ```
 
 ### Paso 3: Configurar variables de entorno
