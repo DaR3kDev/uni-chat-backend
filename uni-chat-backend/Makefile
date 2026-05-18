@@ -9,23 +9,54 @@ COMPOSE  := docker compose
 DOCS_DIR := ../docs
 DOTNET   := dotnet
 
-.PHONY: help setup setup-interactive restore build run watch clean clean-confirm \
-        up down down-confirm restart logs ps docker-build docker-up \
+# --- Funciones auxiliares para mensajes con emojis ---
+
+# Colores ANSI
+COLOR_RESET   := \033[0m
+COLOR_BOLD    := \033[1m
+COLOR_GREEN   := \033[32m
+COLOR_YELLOW  := \033[33m
+COLOR_BLUE    := \033[34m
+COLOR_MAGENTA := \033[35m
+COLOR_CYAN    := \033[36m
+COLOR_RED     := \033[31m
+
+# Función para imprimir paso con emoji
+define print_step
+@echo "$(COLOR_CYAN)$(1)$(COLOR_RESET)$(2)"
+endef
+
+# Función para imprimir éxito
+define print_success
+@echo "$(COLOR_GREEN)✅ $(1)$(COLOR_RESET)"
+endef
+
+# Función para imprimir error
+define print_error
+@echo "$(COLOR_RED)❌ $(1)$(COLOR_RESET)"
+endef
+
+# Función para imprimir banner
+define print_header
+@echo ""
+@echo "$(COLOR_BOLD)$(COLOR_MAGENTA)$(1)$(COLOR_RESET)"
+@echo "$(COLOR_MAGENTA)$(2)$(COLOR_RESET)"
+@echo ""
+endef
+
+.PHONY: help setup setup-interactive install restore build run watch clean clean-confirm \
+        up down down-confirm restart logs ps ports docker-build docker-up \
         docs-install docs docs-build dev dev-watch menu
 
 # --- Ayuda ---
 
 help: ## Muestra todos los comandos y sus descripciones en español
-	@echo ""
-	@echo "  Uni Chat Backend — comandos disponibles"
-	@echo ""
+	@$(call print_header,"📖 Uni Chat Backend — Comandos Disponibles","═════════════════════════════════════════")
 	@grep -E '^[a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}'
+		awk 'BEGIN {FS = ":.*## "}; {printf "  $(COLOR_CYAN)%-22s$(COLOR_RESET) %s\n", $$1, $$2}'
 	@echo ""
-	@echo "  Puertos típicos tras \`make up\`:"
-	@echo "    MongoDB 27017 | Redis 6379 | RabbitMQ 5672 (UI 15672)"
-	@echo "    mongo-express 8081 | RedisInsight 5540 | Seq 5341"
-	@echo "    Dozzle 8083 | Portainer 9000/9443 | API 8080 (solo \`make docker-up\`)"
+	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make install$(COLOR_RESET) para una instalación completa"
+	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make ports$(COLOR_RESET) para ver todos los puertos"
 	@echo ""
 
 # --- Configuración ---
@@ -57,22 +88,58 @@ setup-interactive: ## Pregunta en español si .env existe: omitir, respaldar o s
 		echo "\033[33mCI=true: se omite setup-interactive (no hay terminal interactiva).\033[0m"; \
 	fi
 
+install: ## Instalación completa con mensajes interactivos, emojis y registro de pasos
+	@$(call print_header,"🚀 Instalación de Uni Chat Backend","═════════════════════════════════════════")
+	@$(call print_step,"🔍","Verificando dependencias...")
+	@command -v dotnet >/dev/null 2>&1 || { $(call print_error,".NET no está instalado. Por favor instala .NET SDK 10."); exit 1; }
+	@command -v docker >/dev/null 2>&1 || { $(call print_error,"Docker no está instalado. Por favor instala Docker."); exit 1; }
+	@$(call print_success,"Dependencias verificadas")
+	@echo ""
+	@$(call print_step,"⚙️","Configurando archivo .env...")
+	@$(MAKE) setup-interactive
+	@$(call print_success,"Configuración completada")
+	@echo ""
+	@$(call print_step,"📦","Restaurando paquetes NuGet...")
+	@$(MAKE) restore
+	@$(call print_success,"Paquetes restaurados")
+	@echo ""
+	@$(call print_step,"🏗️","Compilando proyecto...")
+	@$(MAKE) build
+	@$(call print_success,"Proyecto compilado")
+	@echo ""
+	@$(call print_header,"✅ Instalación completada","═════════════════════════════════════════")
+	@echo "🎉 ¡Todo listo para comenzar!"
+	@echo ""
+	@echo "Próximos pasos:"
+	@echo "  • Ejecuta $(COLOR_CYAN)make up$(COLOR_RESET) para levantar los servicios Docker"
+	@echo "  • Ejecuta $(COLOR_CYAN)make run$(COLOR_RESET) para iniciar la API"
+	@echo "  • O usa $(COLOR_CYAN)make dev$(COLOR_RESET) para hacer todo junto"
+	@echo ""
+
 # --- .NET ---
 
 restore: ## Descarga y restaura los paquetes NuGet del proyecto
+	@$(call print_step,"📦","Restaurando paquetes NuGet...")
 	$(DOTNET) restore $(CSPROJ)
+	@$(call print_success,"Paquetes restaurados")
 
 build: ## Compila el proyecto sin ejecutarlo
+	@$(call print_step,"🏗️","Compilando proyecto...")
 	$(DOTNET) build $(CSPROJ)
+	@$(call print_success,"Proyecto compilado")
 
 run: ## Ejecuta la API (http://localhost:5012 en perfil http)
+	@$(call print_step,"🚀","Iniciando API en http://localhost:5012...")
 	$(DOTNET) run --project $(CSPROJ)
 
 watch: ## Ejecuta la API con recarga automática al guardar cambios
+	@$(call print_step,"👀","Iniciando API con hot reload...")
 	$(DOTNET) watch run --project $(CSPROJ)
 
 clean: ## Elimina artefactos de compilación (sin confirmación; apto para CI)
+	@$(call print_step,"🧹","Limpiando artefactos de compilación...")
 	$(DOTNET) clean $(CSPROJ)
+	@$(call print_success,"Limpieza completada")
 
 clean-confirm: ## Pide confirmación en español antes de limpiar artefactos
 	@if [ "$$CI" = "true" ]; then \
@@ -86,10 +153,14 @@ clean-confirm: ## Pide confirmación en español antes de limpiar artefactos
 # --- Docker ---
 
 up: ## Inicia MongoDB, Redis, RabbitMQ y paneles de administración en segundo plano
+	@$(call print_step,"🐳","Levantando contenedores Docker...")
 	$(COMPOSE) up -d
+	@$(call print_success,"Contenedores levantados")
 
 down: ## Detiene y elimina los contenedores del stack (sin confirmación)
+	@$(call print_step,"🛑","Deteniendo contenedores Docker...")
 	$(COMPOSE) down
+	@$(call print_success,"Contenedores detenidos")
 
 down-confirm: ## Detiene contenedores tras confirmación (pregunta en español)
 	@if [ "$$CI" = "true" ]; then \
@@ -101,35 +172,69 @@ down-confirm: ## Detiene contenedores tras confirmación (pregunta en español)
 	fi
 
 restart: down up ## Reinicia todos los contenedores (down + up)
+	@$(call print_step,"🔄","Reiniciando contenedores...")
 
 logs: ## Muestra los logs en tiempo real de todos los servicios
+	@$(call print_step,"📋","Mostrando logs (Ctrl+C para salir)...")
 	$(COMPOSE) logs -f
 
 ps: ## Lista el estado actual de los contenedores
+	@$(call print_step,"📊","Estado de contenedores:")
 	$(COMPOSE) ps
 
+ports: ## Muestra los puertos de los servicios Docker
+	@$(call print_header,"📊 Puertos de Servicios Docker","═════════════════════════════════════════")
+	@echo "$(COLOR_BOLD)Servicio$(COLOR_RESET)           $(COLOR_BOLD)Puerto$(COLOR_RESET)    $(COLOR_BOLD)URL$(COLOR_RESET)"
+	@echo "─────────────────────────────────────────────────────────────────"
+	@echo "🐘 MongoDB             27017        mongodb://localhost:27017"
+	@echo "🔴 Redis               6379         redis://localhost:6379"
+	@echo "🐰 RabbitMQ            5672         amqp://localhost:5672"
+	@echo "🐰 RabbitMQ UI         15672        http://localhost:15672"
+	@echo "🗄️  mongo-express       8081         http://localhost:8081"
+	@echo "🔍 RedisInsight        5540         http://localhost:5540"
+	@echo "📋 Seq (logs)          5341         http://localhost:5341"
+	@echo "📺 Dozzle (logs UI)    8083         http://localhost:8083"
+	@echo "🚢 Portainer           9000         http://localhost:9000"
+	@echo "🚢 Portainer (HTTPS)   9443         https://localhost:9443"
+	@echo "🌐 API (docker-up)     8080         http://localhost:8080"
+	@echo "─────────────────────────────────────────────────────────────────"
+	@echo ""
+	@echo "$(COLOR_YELLOW)Nota:$(COLOR_RESET) La API en modo desarrollo (make run) usa el puerto 5012"
+	@echo ""
+
 docker-build: ## Construye la imagen Docker de la API
+	@$(call print_step,"🔨","Construyendo imagen Docker...")
 	$(COMPOSE) build api
+	@$(call print_success,"Imagen Docker construida")
 
 docker-up: ## Construye y levanta el stack completo, incluyendo la API (puerto 8080)
+	@$(call print_step,"🚀","Levantando stack completo con API...")
 	$(COMPOSE) up -d --build
+	@$(call print_success,"Stack levantado en http://localhost:8080")
 
 # --- Documentación (Docusaurus) ---
 
 docs-install: ## Instala las dependencias de la documentación con Bun
+	@$(call print_step,"📚","Instalando dependencias de documentación...")
 	cd $(DOCS_DIR) && bun install
+	@$(call print_success,"Dependencias instaladas")
 
 docs: ## Inicia el servidor de desarrollo de la documentación
+	@$(call print_step,"📖","Iniciando servidor de documentación...")
 	cd $(DOCS_DIR) && bun run start
 
 docs-build: ## Genera el build estático de la documentación
+	@$(call print_step,"📦","Generando build de documentación...")
 	cd $(DOCS_DIR) && bun run build
+	@$(call print_success,"Build generado")
 
 # --- Atajos ---
 
 dev: setup up run ## Configura .env, levanta Docker y ejecuta la API (bloqueante)
+	@$(call print_step,"🚀","Modo desarrollo completo...")
 
 dev-watch: setup up watch ## Configura .env, levanta Docker y ejecuta la API con recarga automática
+	@$(call print_step,"👀","Modo desarrollo con hot reload...")
 
 # --- Menú interactivo ---
 
