@@ -34,9 +34,17 @@ API de chat en tiempo real con **ASP.NET Core 10**: JWT, MongoDB, Redis, RabbitM
 Desde la carpeta del proyecto .NET (`uni-chat-backend/uni-chat-backend/`):
 
 ```bash
-cd uni-chat-backend
+# 1. Variables de entorno (Docker / servicios)
 cp .env.ci.example .env
-# Edita appsettings.json (localhost) y Cloudinary en .env si lo necesitas
+
+# 2. Configuración de Cloudinary (opcional)
+cp appsettings.Development.example.json appsettings.Development.json
+# Edita appsettings.Development.json (localhost) y Cloudinary en .env si lo necesitas
+
+# 3. Generar configuración de ASP.NET (OBLIGATORIO)
+make setup
+
+# 4. Levantar infraestructura (MongoDB, Redis, RabbitMQ, etc.) y API
 make up && make run
 ```
 
@@ -96,6 +104,8 @@ En Windows, el Makefile requiere **bash** (WSL2 o Git Bash). Ver [Windows sin Ma
 | `appsettings.json` | API en el **host** con `make run` |
 | `.env.ci.example` | Valores de prueba listos para copiar |
 | `.env.example` | Plantilla vacía (`make setup`) |
+| `appsettings.Development.json` | generado automáticamente con make setup |
+
 
 Guía completa de variables y ejemplos: **[Instalación — Paso 3](https://dar3kdev.github.io/uni-chat-backend/instalacion.html#paso-3--configurar-variables-locales)**.
 
