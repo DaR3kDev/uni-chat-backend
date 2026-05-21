@@ -72,157 +72,245 @@ help: ## Muestra todos los comandos y sus descripciones en español
 
 # --- Configuración ---
 
-setup: ## Crea .env y appsettings.Development.json automáticamente
+setup: ## Configuración interactiva: pregunta variables y genera .env
 	@$(call print_header,"⚙️ Configuración Inicial","═════════════════════════════════════════")
 
-	@# =========================================================
-	@# Verificar .env.example
-	@# =========================================================
-	@if [ ! -f .env.example ]; then \
-		echo "\033[31mNo se encontró .env.example.\033[0m"; \
-		exit 1; \
+	@if [ "$$CI" = "true" ]; then \
+		echo "$(COLOR_YELLOW)CI=true detectado — setup interactivo omitido.$(COLOR_RESET)"; \
+		exit 0; \
 	fi
 
 	@# =========================================================
-	@# Crear .env
+	@# Verificar si ya existe .env
 	@# =========================================================
 	@if [ -f .env ]; then \
-		echo "\033[33mYa existe .env — no se ha modificado nada.\033[0m"; \
-	else \
-		cp .env.example .env; \
-		echo "\033[32mArchivo .env creado. Edítalo con tus credenciales antes de \`make up\`.\033[0m"; \
+		echo "$(COLOR_YELLOW)⚠️ Ya existe un archivo .env$(COLOR_RESET)"; \
+		read -r -p "¿Deseas sobrescribirlo? [s/N]: " confirm; \
+		case "$$confirm" in \
+			s|S|si|SI|sí|Sí) \
+				cp .env ".env.backup.$$(date +%Y%m%d%H%M%S)"; \
+				echo "$(COLOR_GREEN)✅ Respaldo creado$(COLOR_RESET)"; \
+				;; \
+			*) \
+				echo "Operación cancelada."; \
+				exit 0; \
+				;; \
+		esac; \
 	fi
 
+	@echo ""
+	@echo "$(COLOR_BOLD)📦 Configuración de la aplicación$(COLOR_RESET)"
+	@echo ""
+
 	@# =========================================================
-	@# Generar appsettings.Development.json
+	@# APP
 	@# =========================================================
-	@export $$(grep -v '^#' .env | xargs) && \
-	printf '%s\n' \
-	'{' \
-	'  "AllowedHosts": "*",' \
-	'  "Logging": {' \
-	'    "LogLevel": {' \
-	'      "Default": "Information",' \
-	'      "Microsoft.AspNetCore": "Warning"' \
-	'    }' \
-	'  },' \
-	'  "Serilog": {' \
-	'    "MinimumLevel": {' \
-	'      "Default": "Information",' \
-	'      "Override": {' \
-	'        "Microsoft": "Warning",' \
-	'        "System": "Warning"' \
-	'      }' \
-	'    }' \
-	'  },' \
-	'  "Mongo": {' \
-	'    "ConnectionString": "'"$$MONGO_CONNECTION_STRING"'",' \
-	'    "Database": "'"$$MONGO_DATABASE"'"' \
-	'  },' \
-	'  "RabbitMQ": {' \
-	'    "ConnectionString": "'"$$RABBITMQ_CONNECTION_STRING"'"' \
-	'  },' \
-	'  "Redis": {' \
-	'    "ConnectionString": "'"$$REDIS_CONNECTION_STRING"'"' \
-	'  },' \
-	'  "Jwt": {' \
-	'    "Key": "'"$$JWT_KEY"'",' \
-	'    "Issuer": "'"$$JWT_ISSUER"'",' \
-	'    "Audience": "'"$$JWT_AUDIENCE"'",' \
-	'    "ExpireMinutes": '"$$JWT_EXPIRE_MINUTES"'' \
-	'  },' \
-	'  "RefreshToken": {' \
-	'    "ExpireDays": '"$$REFRESH_EXPIRE_DAYS"'' \
-	'  },' \
-	'  "Cloudinary": {' \
-	'    "CloudName": "'"$$CLOUDINARY_CLOUD_NAME"'",' \
-	'    "ApiKey": "'"$$CLOUDINARY_API_KEY"'",' \
-	'    "ApiSecret": "'"$$CLOUDINARY_API_SECRET"'"' \
-	'  },' \
-	'  "EnableDocs": true' \
-	'}' > appsettings.Development.json && \
-	echo "\033[32mArchivo appsettings.Development.json generado automáticamente.\033[0m"
+	@read -r -p "ASPNETCORE_ENVIRONMENT [Production]: " ASPNETCORE_ENVIRONMENT; \
+	ASPNETCORE_ENVIRONMENT=$${ASPNETCORE_ENVIRONMENT:-Production}; \
 
-setup-interactive: ## Pregunta en español si .env existe: omitir, respaldar o sobrescribir
-	@if [ -z "$$CI" ] || [ "$$CI" != "true" ]; then \
+	read -r -p "ENABLE_DOCS [true]: " ENABLE_DOCS; \
+	ENABLE_DOCS=$${ENABLE_DOCS:-true}; \
 
-		if [ ! -f .env.example ]; then \
-			echo "\033[31mNo se encontró .env.example.\033[0m"; \
-			exit 1; \
-		fi; \
+	@# =========================================================
+	@# MONGODB
+	@# =========================================================
+	echo ""; \
+	echo "$(COLOR_BOLD)🍃 MongoDB$(COLOR_RESET)"; \
 
-		# ========================================================= \
-		# .env \
-		# ========================================================= \
-		if [ ! -f .env ]; then \
-			cp .env.example .env; \
-			echo "\033[32mArchivo .env creado desde .env.example.\033[0m"; \
+	read -r -p "Mongo root username [admin]: " MONGO_ROOT_USERNAME; \
+	MONGO_ROOT_USERNAME=$${MONGO_ROOT_USERNAME:-admin}; \
+
+	read -r -s -p "Mongo root password [admin123]: " MONGO_ROOT_PASSWORD; \
+	echo ""; \
+	MONGO_ROOT_PASSWORD=$${MONGO_ROOT_PASSWORD:-admin123}; \
+
+	read -r -p "Mongo database [chat_db]: " MONGO_DATABASE; \
+	MONGO_DATABASE=$${MONGO_DATABASE:-chat_db}; \
+
+	MONGO_CONNECTION_STRING="mongodb://$$MONGO_ROOT_USERNAME:$$MONGO_ROOT_PASSWORD@mongodb:27017/?authSource=admin"; \
+
+	@# =========================================================
+	@# REDIS
+	@# =========================================================
+	echo ""; \
+	echo "$(COLOR_BOLD)🔴 Redis$(COLOR_RESET)"; \
+
+	read -r -p "Redis connection [redis:6379]: " REDIS_CONNECTION_STRING; \
+	REDIS_CONNECTION_STRING=$${REDIS_CONNECTION_STRING:-redis:6379}; \
+
+	@# =========================================================
+	@# RABBITMQ
+	@# =========================================================
+	echo ""; \
+	echo "$(COLOR_BOLD)🐰 RabbitMQ$(COLOR_RESET)"; \
+
+	read -r -p "RabbitMQ user [admin]: " RABBITMQ_USER; \
+	RABBITMQ_USER=$${RABBITMQ_USER:-admin}; \
+
+	read -r -s -p "RabbitMQ password [admin123]: " RABBITMQ_PASS; \
+	echo ""; \
+	RABBITMQ_PASS=$${RABBITMQ_PASS:-admin123}; \
+
+	RABBITMQ_CONNECTION_STRING="amqp://$$RABBITMQ_USER:$$RABBITMQ_PASS@rabbitmq:5672"; \
+
+	@# =========================================================
+	@# JWT
+	@# =========================================================
+	echo ""; \
+	echo "$(COLOR_BOLD)🔐 JWT$(COLOR_RESET)"; \
+
+	read -r -p "JWT issuer [uni-chat]: " JWT_ISSUER; \
+	JWT_ISSUER=$${JWT_ISSUER:-uni-chat}; \
+
+	read -r -p "JWT audience [uni-chat-users]: " JWT_AUDIENCE; \
+	JWT_AUDIENCE=$${JWT_AUDIENCE:-uni-chat-users}; \
+
+	read -r -p "JWT expire minutes [15]: " JWT_EXPIRE_MINUTES; \
+	JWT_EXPIRE_MINUTES=$${JWT_EXPIRE_MINUTES:-15}; \
+
+	read -r -p "JWT key (vacío = generar automática): " JWT_KEY; \
+
+	if [ -z "$$JWT_KEY" ]; then \
+		if command -v openssl >/dev/null 2>&1; then \
+			JWT_KEY=$$(openssl rand -base64 64); \
 		else \
-			echo "\033[33mYa existe un archivo .env.\033[0m"; \
-			read -r -p "¿Qué deseas hacer con .env? [1=omitir / 2=respaldar y crear nuevo / 3=salir]: " choice; \
-			case "$$choice" in \
-				1) echo "Sin cambios en .env." ;; \
-				2) cp .env ".env.backup.$$(date +%Y%m%d%H%M%S)"; \
-				   cp .env.example .env; \
-				   echo "\033[32mRespaldo creado y nuevo .env generado.\033[0m" ;; \
-				3|*) echo "Operación finalizada."; exit 0 ;; \
-			esac; \
+			JWT_KEY=$$(date +%s | sha256sum | base64 | head -c 64); \
 		fi; \
+		echo "$(COLOR_GREEN)✅ JWT generado automáticamente$(COLOR_RESET)"; \
+	fi; \
 
-		# ========================================================= \
-		# Generar appsettings.Development.json \
-		# ========================================================= \
-		export $$(grep -v '^#' .env | xargs) && \
-		printf '%s\n' \
-		'{' \
-		'  "AllowedHosts": "*",' \
-		'  "Logging": {' \
-		'    "LogLevel": {' \
-		'      "Default": "Information",' \
-		'      "Microsoft.AspNetCore": "Warning"' \
-		'    }' \
-		'  },' \
-		'  "Serilog": {' \
-		'    "MinimumLevel": {' \
-		'      "Default": "Information",' \
-		'      "Override": {' \
-		'        "Microsoft": "Warning",' \
-		'        "System": "Warning"' \
-		'      }' \
-		'    }' \
-		'  },' \
-		'  "Mongo": {' \
-		'    "ConnectionString": "'"$$MONGO_CONNECTION_STRING"'",' \
-		'    "Database": "'"$$MONGO_DATABASE"'"' \
-		'  },' \
-		'  "RabbitMQ": {' \
-		'    "ConnectionString": "'"$$RABBITMQ_CONNECTION_STRING"'"' \
-		'  },' \
-		'  "Redis": {' \
-		'    "ConnectionString": "'"$$REDIS_CONNECTION_STRING"'"' \
-		'  },' \
-		'  "Jwt": {' \
-		'    "Key": "'"$$JWT_KEY"'",' \
-		'    "Issuer": "'"$$JWT_ISSUER"'",' \
-		'    "Audience": "'"$$JWT_AUDIENCE"'",' \
-		'    "ExpireMinutes": '"$$JWT_EXPIRE_MINUTES"'' \
-		'  },' \
-		'  "RefreshToken": {' \
-		'    "ExpireDays": '"$$REFRESH_EXPIRE_DAYS"'' \
-		'  },' \
-		'  "Cloudinary": {' \
-		'    "CloudName": "'"$$CLOUDINARY_CLOUD_NAME"'",' \
-		'    "ApiKey": "'"$$CLOUDINARY_API_KEY"'",' \
-		'    "ApiSecret": "'"$$CLOUDINARY_API_SECRET"'"' \
-		'  },' \
-		'  "EnableDocs": true' \
-		'}' > appsettings.Development.json && \
-		echo "\033[32mArchivo appsettings.Development.json generado automáticamente.\033[0m"; \
+	@# =========================================================
+	@# REFRESH TOKEN
+	@# =========================================================
+	echo ""; \
+	echo "$(COLOR_BOLD)♻️ Refresh Token$(COLOR_RESET)"; \
 
-	else \
-		echo "\033[33mCI=true: se omite setup-interactive (no hay terminal interactiva).\033[0m"; \
-	fi
+	read -r -p "Refresh expire days [7]: " REFRESH_EXPIRE_DAYS; \
+	REFRESH_EXPIRE_DAYS=$${REFRESH_EXPIRE_DAYS:-7}; \
 
+	@# =========================================================
+	@# CLOUDINARY
+	@# =========================================================
+	echo ""; \
+	echo "$(COLOR_BOLD)☁️ Cloudinary$(COLOR_RESET)"; \
+
+	read -r -p "Cloudinary cloud name: " CLOUDINARY_CLOUD_NAME; \
+	while [ -z "$$CLOUDINARY_CLOUD_NAME" ]; do \
+		echo "$(COLOR_RED)❌ Este campo es obligatorio$(COLOR_RESET)"; \
+		read -r -p "Cloudinary cloud name: " CLOUDINARY_CLOUD_NAME; \
+	done; \
+
+	read -r -p "Cloudinary API key: " CLOUDINARY_API_KEY; \
+	while [ -z "$$CLOUDINARY_API_KEY" ]; do \
+		echo "$(COLOR_RED)❌ Este campo es obligatorio$(COLOR_RESET)"; \
+		read -r -p "Cloudinary API key: " CLOUDINARY_API_KEY; \
+	done; \
+
+	read -r -s -p "Cloudinary API secret: " CLOUDINARY_API_SECRET; \
+	echo ""; \
+	while [ -z "$$CLOUDINARY_API_SECRET" ]; do \
+		echo "$(COLOR_RED)❌ Este campo es obligatorio$(COLOR_RESET)"; \
+		read -r -s -p "Cloudinary API secret: " CLOUDINARY_API_SECRET; \
+		echo ""; \
+	done; \
+
+	@# =========================================================
+	@# SEQ
+	@# =========================================================
+	echo ""; \
+	echo "$(COLOR_BOLD)📋 Seq$(COLOR_RESET)"; \
+
+	read -r -p "Seq admin [admin]: " SEQ_ADMIN; \
+	SEQ_ADMIN=$${SEQ_ADMIN:-admin}; \
+
+	read -r -s -p "Seq password [Admin123!]: " SEQ_ADMIN_PASSWORD; \
+	echo ""; \
+	SEQ_ADMIN_PASSWORD=$${SEQ_ADMIN_PASSWORD:-Admin123!}; \
+
+	@# =========================================================
+	@# GENERAR .ENV
+	@# =========================================================
+	echo ""; \
+	echo "$(COLOR_CYAN)📝 Generando archivo .env...$(COLOR_RESET)"; \
+
+	cat > .env <<EOF\n\
+# =========================================================\n\
+# APP\n\
+# =========================================================\n\
+ASPNETCORE_ENVIRONMENT=$$ASPNETCORE_ENVIRONMENT\n\
+ENABLE_DOCS=$$ENABLE_DOCS\n\
+\n\
+# =========================================================\n\
+# MongoDB\n\
+# =========================================================\n\
+MONGO_ROOT_USERNAME=$$MONGO_ROOT_USERNAME\n\
+MONGO_ROOT_PASSWORD=$$MONGO_ROOT_PASSWORD\n\
+MONGO_CONNECTION_STRING=$$MONGO_CONNECTION_STRING\n\
+MONGO_DATABASE=$$MONGO_DATABASE\n\
+\n\
+# =========================================================\n\
+# Redis\n\
+# =========================================================\n\
+REDIS_CONNECTION_STRING=$$REDIS_CONNECTION_STRING\n\
+\n\
+# =========================================================\n\
+# RabbitMQ\n\
+# =========================================================\n\
+RABBITMQ_USER=$$RABBITMQ_USER\n\
+RABBITMQ_PASS=$$RABBITMQ_PASS\n\
+RABBITMQ_CONNECTION_STRING=$$RABBITMQ_CONNECTION_STRING\n\
+\n\
+# =========================================================\n\
+# JWT\n\
+# =========================================================\n\
+JWT_KEY=$$JWT_KEY\n\
+JWT_ISSUER=$$JWT_ISSUER\n\
+JWT_AUDIENCE=$$JWT_AUDIENCE\n\
+JWT_EXPIRE_MINUTES=$$JWT_EXPIRE_MINUTES\n\
+\n\
+# =========================================================\n\
+# Refresh Token\n\
+# =========================================================\n\
+REFRESH_EXPIRE_DAYS=$$REFRESH_EXPIRE_DAYS\n\
+\n\
+# =========================================================\n\
+# Cloudinary\n\
+# =========================================================\n\
+CLOUDINARY_CLOUD_NAME=$$CLOUDINARY_CLOUD_NAME\n\
+CLOUDINARY_API_KEY=$$CLOUDINARY_API_KEY\n\
+CLOUDINARY_API_SECRET=$$CLOUDINARY_API_SECRET\n\
+\n\
+# =========================================================\n\
+# Seq\n\
+# =========================================================\n\
+SEQ_ADMIN=$$SEQ_ADMIN\n\
+SEQ_ADMIN_PASSWORD=$$SEQ_ADMIN_PASSWORD\n\
+EOF
+
+	@# =========================================================
+	@# RESUMEN FINAL
+	@# =========================================================
+	@echo ""
+	@$(call print_header,"✅ Configuración completada","═════════════════════════════════════════")
+	@echo "📄 Archivo generado: .env"
+	@echo ""
+	@echo "$(COLOR_BOLD)Resumen$(COLOR_RESET)"
+	@echo "──────────────────────────────────────"
+	@echo "🌍 Environment: $$ASPNETCORE_ENVIRONMENT"
+	@echo "🍃 MongoDB DB: $$MONGO_DATABASE"
+	@echo "🔴 Redis: $$REDIS_CONNECTION_STRING"
+	@echo "🐰 RabbitMQ User: $$RABBITMQ_USER"
+	@echo "🔐 JWT Issuer: $$JWT_ISSUER"
+	@echo "☁️ Cloudinary: $$CLOUDINARY_CLOUD_NAME"
+	@echo "📋 Seq Admin: $$SEQ_ADMIN"
+	@echo "──────────────────────────────────────"
+	@echo ""
+	@echo "$(COLOR_GREEN)✅ Archivo .env creado correctamente$(COLOR_RESET)"
+	@echo ""
+	@echo "Siguiente paso:"
+	@echo "  $(COLOR_CYAN)make up$(COLOR_RESET)"
+	@echo ""
+	
 install: ## Instalación completa con mensajes interactivos, emojis y registro de pasos
 	@$(call print_header,"🚀 Instalación de Uni Chat Backend","═════════════════════════════════════════")
 	@$(call print_step,"🔍","Verificando dependencias...")
