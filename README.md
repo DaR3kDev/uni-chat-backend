@@ -8,7 +8,8 @@ API de chat en tiempo real con **ASP.NET Core 10**: JWT, MongoDB, Redis, RabbitM
 
 **¿Primera vez en el proyecto?** Sigue la guía paso a paso (instalación, configuración, errores comunes):
 
-**[docs/GUIA-INSTALACION.md](docs/GUIA-INSTALACION.md)**
+- **Sitio web:** [dar3kdev.github.io/uni-chat-backend](https://dar3kdev.github.io/uni-chat-backend/)
+- **En el repo:** [docs/instalacion.md](docs/instalacion.md) · [docs/GUIA-INSTALACION.md](docs/GUIA-INSTALACION.md) (índice)
 
 ---
 
@@ -24,7 +25,7 @@ API de chat en tiempo real con **ASP.NET Core 10**: JWT, MongoDB, Redis, RabbitM
 - [Windows sin Make](#windows-sin-make)
 - [Solución de problemas](#solución-de-problemas)
 - [Seguridad](#seguridad)
-- [Documentación API](#documentación-api)
+- [Documentación](#documentación)
 
 ---
 
@@ -41,7 +42,7 @@ make up && make run
 
 API: **http://localhost:5012**
 
-Pasos detallados, checklist y troubleshooting: **[GUIA-INSTALACION.md](docs/GUIA-INSTALACION.md)**.
+Pasos detallados, checklist y troubleshooting: **[instalacion.md](docs/instalacion.md)** o el [sitio de documentación](https://dar3kdev.github.io/uni-chat-backend/instalacion.html).
 
 ---
 
@@ -52,10 +53,12 @@ uni-chat-backend/                 ← raíz del repo (este README)
 ├── .githooks/                    ← pre-commit (make install-hooks)
 ├── .github/workflows/            ← CI/CD en GitHub Actions
 ├── scripts/                      ← render-env.sh, install-git-hooks.sh
-├── docs/
-│   ├── GUIA-INSTALACION.md       ← guía para principiantes
-│   ├── github-secrets.md         ← secrets y deploy
-│   └── docs/                     ← Docusaurus (API, arquitectura)
+├── docs/                         ← Jekyll (GitHub Pages)
+│   ├── _config.yml
+│   ├── instalacion.md
+│   ├── backend.md
+│   ├── github-secrets.md
+│   └── ...
 ├── uni-chat-backend/             ← código .NET + Makefile + Docker
 │   ├── Makefile
 │   ├── .env.example
@@ -77,7 +80,7 @@ uni-chat-backend/                 ← raíz del repo (este README)
 | .NET SDK 10 | [Descarga](https://dotnet.microsoft.com/download) | `brew install dotnet` | Instalador o WSL2 |
 | Docker + Compose v2 | Docker Engine | Docker Desktop | Docker Desktop (WSL2) |
 | GNU Make | `apt install build-essential` | Xcode CLI / `brew install make` | WSL2 recomendado |
-| Bun 1.2.23 (solo docs) | Ver [`.bun-version`](docs/.bun-version) | Igual | WSL2 |
+| Ruby + Bundler (opcional) | Solo preview local de docs | `brew install ruby` | WSL2 |
 
 En Windows, el Makefile requiere **bash** (WSL2 o Git Bash). Ver [Windows sin Make](#windows-sin-make).
 
@@ -92,9 +95,9 @@ En Windows, el Makefile requiere **bash** (WSL2 o Git Bash). Ver [Windows sin Ma
 | `.env.ci.example` | Valores de prueba listos para copiar |
 | `.env.example` | Plantilla vacía (`make setup`) |
 
-Guía completa de variables y ejemplos: **[GUIA-INSTALACION — Paso 3](docs/GUIA-INSTALACION.md#paso-3--configurar-variables-locales)**.
+Guía completa de variables y ejemplos: **[Instalación — Paso 3](https://dar3kdev.github.io/uni-chat-backend/instalacion.html#paso-3--configurar-variables-locales)**.
 
-Secrets en producción / GitHub: **[docs/github-secrets.md](docs/github-secrets.md)**.
+Secrets en producción / GitHub: **[github-secrets.md](docs/github-secrets.md)**.
 
 ---
 
@@ -125,13 +128,15 @@ Ejecuta `make help` desde `uni-chat-backend/` (descripciones en español).
 | `test` | Tests unitarios |
 | `env-from-ci` | Genera `.env` desde variables de entorno |
 
-### Documentación
+### Documentación (Jekyll)
 
 | Comando | Descripción |
 |---------|-------------|
-| `docs-install` | `bun install` en `docs/` |
-| `docs` | Servidor Docusaurus |
-| `docs-build` | Build estático |
+| `docs-install` | `bundle install` en `docs/` |
+| `docs` | Servidor Jekyll local |
+| `docs-build` | Build estático (validación) |
+
+Publicación: push a `main` → GitHub Pages construye `docs/` automáticamente. Ver [docs/PAGES.md](docs/PAGES.md).
 
 ---
 
@@ -170,7 +175,7 @@ ghcr.io/dar3kdev/uni-chat-backend:main
 ghcr.io/dar3kdev/uni-chat-backend:<commit-sha>
 ```
 
-Uso en servidor, compose de producción y login en registry: **[GUIA-INSTALACION — Producción GHCR](docs/GUIA-INSTALACION.md#producción-con-imagen-docker-ghcr)**.
+Uso en servidor, compose de producción y login en registry: **[Instalación — Producción GHCR](https://dar3kdev.github.io/uni-chat-backend/instalacion.html#producción-con-imagen-docker-ghcr)**.
 
 ---
 
@@ -199,9 +204,8 @@ Desde `uni-chat-backend/`:
 | Docker / puerto en uso | `make down`, `make ps` |
 | API no conecta a Mongo/Redis | `localhost` en `appsettings.json` con `make run`; hosts Docker en `.env` con `docker-up` |
 | CI o commit falla en lint | `make lint-fix` |
-| Bun incorrecto | `bun upgrade --version 1.2.23` |
 
-**Más casos y soluciones paso a paso:** [GUIA-INSTALACION — Errores frecuentes](docs/GUIA-INSTALACION.md#errores-frecuentes).
+**Más casos y soluciones paso a paso:** [Instalación — Errores frecuentes](https://dar3kdev.github.io/uni-chat-backend/instalacion.html#errores-frecuentes).
 
 ---
 
@@ -213,9 +217,15 @@ Desde `uni-chat-backend/`:
 
 ---
 
-## Documentación API
+## Documentación
 
-- Guía de instalación: [docs/GUIA-INSTALACION.md](docs/GUIA-INSTALACION.md)
-- Endpoints y arquitectura: [docs/docs/backend.mdx](docs/docs/backend.mdx)
-- Chat privado / E2E: [docs/docs/chat-privado.md](docs/docs/chat-privado.md)
-- Sitio Docusaurus (local): `make docs` desde `uni-chat-backend/`
+| Recurso | Enlace |
+|---------|--------|
+| Sitio (GitHub Pages) | [dar3kdev.github.io/uni-chat-backend](https://dar3kdev.github.io/uni-chat-backend/) |
+| Instalación | [instalacion.md](docs/instalacion.md) |
+| Backend / API | [backend.md](docs/backend.md) |
+| Chat privado / E2E | [chat-privado.md](docs/chat-privado.md) |
+| CI/CD y secrets | [github-secrets.md](docs/github-secrets.md) |
+| Configurar Pages | [docs/PAGES.md](docs/PAGES.md) |
+| Preview local | `make docs` desde `uni-chat-backend/` |
+| OpenAPI / Scalar | Con la API en ejecución (`Development`) |

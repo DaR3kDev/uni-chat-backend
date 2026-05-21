@@ -10,9 +10,6 @@ TEST_PROJ  := uni-chat-backend.Tests/uni-chat-backend.Tests.csproj
 CONFIG     := Release
 COMPOSE    := docker compose
 DOCS_DIR      := ../docs
-BUN_VERSION_FILE := $(DOCS_DIR)/.bun-version
-BUN_VERSION   := $(shell cat $(BUN_VERSION_FILE) 2>/dev/null || echo "1.2.23")
-BUN           := $(shell command -v bun 2>/dev/null || echo "$(HOME)/.bun/bin/bun")
 # dotnet en PATH, o instalación local en ~/.dotnet (script oficial / CI del agente)
 DOTNET        := $(shell command -v dotnet 2>/dev/null || echo "$(HOME)/.dotnet/dotnet")
 IMAGE_NAME ?= ghcr.io/dar3kdev/uni-chat-backend
@@ -334,34 +331,29 @@ docker-release: docker-image docker-push ## Construye y publica la imagen en un 
 	@echo "  docker pull $(IMAGE_NAME):$(IMAGE_TAG)"
 	@echo ""
 
-# --- Documentación (Docusaurus) ---
+# --- Documentación (Jekyll / GitHub Pages) ---
 
-check-bun:
-	@if [ ! -x "$(BUN)" ] && ! command -v bun >/dev/null 2>&1; then \
-		echo "$(COLOR_RED)❌ Bun no encontrado (versión requerida: $(BUN_VERSION)).$(COLOR_RESET)"; \
-		echo "Instala: curl -fsSL https://bun.sh/install | bash -s \"bun-v$(BUN_VERSION)\""; \
-		echo "Versión del proyecto: $(BUN_VERSION_FILE)"; \
+check-bundle:
+	@if ! command -v bundle >/dev/null 2>&1; then \
+		echo "$(COLOR_RED)❌ Bundler no encontrado.$(COLOR_RESET)"; \
+		echo "Instala Ruby y ejecuta: gem install bundler"; \
+		echo "O edita Markdown en docs/ y deja que GitHub Pages construya al hacer push."; \
 		exit 1; \
 	fi
-	@installed="$$($(BUN) --version 2>/dev/null | tr -d '\n')"; \
-	if [ -n "$$installed" ] && [ "$$installed" != "$(BUN_VERSION)" ]; then \
-		echo "$(COLOR_YELLOW)⚠️  Bun $$installed detectado; el proyecto usa $(BUN_VERSION).$(COLOR_RESET)"; \
-		echo "Actualiza: $(BUN) upgrade --version $(BUN_VERSION)"; \
-	fi
 
-docs-install: check-bun ## Instala dependencias de docs con Bun $(BUN_VERSION)
-	@$(call print_step,"📚","Instalando dependencias de documentación — Bun $(BUN_VERSION)...")
-	cd $(DOCS_DIR) && $(BUN) install
+docs-install: check-bundle ## Instala gemas Jekyll (preview local de docs/)
+	@$(call print_step,"📚","Instalando gemas de documentación — github-pages...")
+	cd $(DOCS_DIR) && bundle config set --local path 'vendor/bundle' && bundle install
 	@$(call print_success,"Dependencias instaladas")
 
-docs: check-bun ## Inicia el servidor de desarrollo de la documentación
+docs: docs-install ## Servidor local Jekyll (http://127.0.0.1:4000)
 	@$(call print_step,"📖","Iniciando servidor de documentación...")
-	cd $(DOCS_DIR) && $(BUN) run start
+	cd $(DOCS_DIR) && bundle exec jekyll serve --livereload --baseurl ""
 
-docs-build: check-bun ## Genera el build estático de la documentación
+docs-build: docs-install ## Build estático Jekyll (validación local)
 	@$(call print_step,"📦","Generando build de documentación...")
-	cd $(DOCS_DIR) && $(BUN) run build
-	@$(call print_success,"Build generado")
+	cd $(DOCS_DIR) && bundle exec jekyll build
+	@$(call print_success,"Build generado en docs/_site/")
 
 # --- Atajos ---
 

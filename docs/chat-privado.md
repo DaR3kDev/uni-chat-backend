@@ -1,8 +1,7 @@
 ---
-id: sistema-chat-privado
-title: Sistema de Chat Privado
-sidebar_label: Sistema de Chat Privado
-sidebar_position: 1
+layout: default
+title: Chat privado / E2E
+nav_order: 3
 ---
 
 # Sistema de Chat Privado

@@ -1,6 +1,12 @@
+---
+layout: default
+title: CI/CD y secrets
+nav_order: 6
+---
+
 # GitHub Secrets y generación de `.env`
 
-> **Primera instalación en tu máquina:** empieza por [GUIA-INSTALACION.md](GUIA-INSTALACION.md) (clonar, Docker, `.env` local y arrancar la API). Este documento es para **producción y GitHub Actions**.
+> **Primera instalación en tu máquina:** empieza por [Instalación](instalacion.html) (clonar, Docker, `.env` local y arrancar la API). Este documento es para **producción y GitHub Actions**.
 
 Los secretos **nunca** se guardan en el repositorio. Se configuran en GitHub y se inyectan como variables de entorno en runners o servidores de deploy.
 
