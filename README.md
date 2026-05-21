@@ -57,8 +57,10 @@ uni-chat-backend/                 ← raíz del repo (este README)
 │   ├── _config.yml
 │   ├── instalacion.md
 │   ├── backend.md
+│   ├── cicd.md
+│   ├── chat-privado/             ← sección anidada (arquitectura, E2EE, …)
 │   ├── github-secrets.md
-│   └── ...
+│   └── contribuir-docs.md
 ├── uni-chat-backend/             ← código .NET + Makefile + Docker
 │   ├── Makefile
 │   ├── .env.example
@@ -136,7 +138,7 @@ Ejecuta `make help` desde `uni-chat-backend/` (descripciones en español).
 | `docs` | Servidor Jekyll local |
 | `docs-build` | Build estático (validación) |
 
-Publicación: push a `main` → GitHub Pages construye `docs/` automáticamente. Ver [docs/PAGES.md](docs/PAGES.md).
+Publicación: push a `main` → GitHub Pages construye `docs/` automáticamente. Ver [contribuir-docs.md](docs/contribuir-docs.md).
 
 ---
 
@@ -224,8 +226,9 @@ Desde `uni-chat-backend/`:
 | Sitio (GitHub Pages) | [dar3kdev.github.io/uni-chat-backend](https://dar3kdev.github.io/uni-chat-backend/) |
 | Instalación | [instalacion.md](docs/instalacion.md) |
 | Backend / API | [backend.md](docs/backend.md) |
-| Chat privado / E2E | [chat-privado.md](docs/chat-privado.md) |
+| Chat privado / E2E | [Sitio — Chat privado](https://dar3kdev.github.io/uni-chat-backend/chat-privado/) |
+| CI/CD | [cicd.md](docs/cicd.md) · [Sitio](https://dar3kdev.github.io/uni-chat-backend/cicd.html) |
 | CI/CD y secrets | [github-secrets.md](docs/github-secrets.md) |
-| Configurar Pages | [docs/PAGES.md](docs/PAGES.md) |
-| Preview local | `make docs` desde `uni-chat-backend/` |
-| OpenAPI / Scalar | Con la API en ejecución (`Development`) |
+| Editar el sitio | [contribuir-docs.md](docs/contribuir-docs.md) |
+| Preview local | `make docs` desde `uni-chat-backend/uni-chat-backend/` |
+| OpenAPI / Scalar | http://localhost:5012/scalar/v1 (API en `Development`) |

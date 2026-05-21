@@ -44,7 +44,7 @@ Marca mentalmente cada punto:
 ## Paso 1 — Clonar el repositorio
 
 ```bash
-git clone <URL-de-tu-repositorio>
+git clone https://github.com/DaR3kDev/uni-chat-backend.git
 cd uni-chat-backend/uni-chat-backend
 ```
 
@@ -123,7 +123,7 @@ Alinea **`appsettings.json`** para que la API en el host use `localhost` (servic
 {
   "Mongo": {
     "ConnectionString": "mongodb://admin:admin123@localhost:27017/?authSource=admin",
-    "Database": "unichat"
+    "Database": "chat_db"
   },
   "Redis": {
     "ConnectionString": "localhost:6379"
@@ -216,7 +216,7 @@ make run
 
 Abre en el navegador: **http://localhost:5012**
 
-- Documentación OpenAPI/Scalar: disponible en entorno `Development`
+- Documentación interactiva (Scalar): **http://localhost:5012/scalar/v1** (entorno `Development`)
 - SignalR (chat en tiempo real): hub `/messages/chat` (requiere JWT)
 
 ### Atajo todo-en-uno
@@ -273,32 +273,19 @@ git commit -m "tu mensaje"
 
 ## Paso 7 — Documentación del proyecto (opcional)
 
-La documentación se publica en **GitHub Pages** (Jekyll): [https://dar3kdev.github.io/uni-chat-backend/](https://dar3kdev.github.io/uni-chat-backend/)
+La documentación se publica en **GitHub Pages**: [{{ site.baseurl }}/]({{ site.baseurl }}/)
 
-Para previsualizar en local (requiere Ruby y Bundler):
-
-```bash
-make docs-install
-make docs
-```
-
-También puedes editar los archivos `.md` en la carpeta `docs/` del repositorio; GitHub reconstruye el sitio al hacer push a `main`.
+Para previsualizar en local: `make docs-install` y `make docs` (ver [Editar documentación]({{ site.baseurl }}/contribuir-docs.html)).
 
 ---
 
-## Producción con imagen Docker (GHCR)
+## Producción con imagen Docker (GHCR) {#producción-con-imagen-docker-ghcr}
 
-En cada push a `main`, GitHub publica una imagen en **GitHub Container Registry**:
-
-```
-ghcr.io/dar3kdev/uni-chat-backend:latest
-ghcr.io/dar3kdev/uni-chat-backend:main
-ghcr.io/dar3kdev/uni-chat-backend:<sha-del-commit>
-```
+En cada push a `main`, GitHub publica imágenes en **GHCR** (`latest`, rama `main`, SHA del commit). Detalle del pipeline: [CI/CD]({{ site.baseurl }}/cicd.html).
 
 ### Descargar y usar la imagen
 
-1. Crea `.env` con variables de producción (o usa `scripts/render-env.sh` con secrets; ver [CI/CD y secrets](github-secrets.html)).
+1. Crea `.env` con variables de producción (o `scripts/render-env.sh` con secrets; ver [CI/CD y secrets]({{ site.baseurl }}/github-secrets.html)).
 
 2. Ejemplo de `docker-compose.prod.yml` (en tu servidor):
 
@@ -398,8 +385,8 @@ Más detalle en el [README — Solución de problemas](https://github.com/DaR3kD
 
 | Tema | Enlace |
 |------|--------|
-| Resumen del repo y Makefile | [README](https://github.com/DaR3kDev/uni-chat-backend/blob/main/README.md) |
-| GitHub Secrets y deploy | [github-secrets](github-secrets.html) |
-| Endpoints y arquitectura API | [backend](backend.html) |
-| Chat privado / E2E | [chat-privado](chat-privado.html) |
-| CI en GitHub | [README — CI/CD](https://github.com/DaR3kDev/uni-chat-backend/blob/main/README.md#cicd-y-calidad) |
+| Resumen del repo | [README en GitHub](https://github.com/DaR3kDev/uni-chat-backend/blob/main/README.md) |
+| Endpoints y SignalR | [Backend]({{ site.baseurl }}/backend.html) |
+| Arquitectura y E2EE | [Chat privado]({{ site.baseurl }}/chat-privado/) |
+| CI/CD y GHCR | [CI/CD]({{ site.baseurl }}/cicd.html) |
+| Secrets y deploy | [CI/CD y secrets]({{ site.baseurl }}/github-secrets.html) |

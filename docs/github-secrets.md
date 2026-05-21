@@ -6,17 +6,33 @@ nav_order: 6
 
 # GitHub Secrets y generación de `.env`
 
-> **Primera instalación en tu máquina:** empieza por [Instalación](instalacion.html) (clonar, Docker, `.env` local y arrancar la API). Este documento es para **producción y GitHub Actions**.
+> **Primera instalación en tu máquina:** empieza por [Instalación]({{ site.baseurl }}/instalacion.html). Este documento es para **producción y GitHub Actions**.
 
 Los secretos **nunca** se guardan en el repositorio. Se configuran en GitHub y se inyectan como variables de entorno en runners o servidores de deploy.
 
+## Flujo de deploy (futuro)
+
+```mermaid
+flowchart LR
+  GH[GitHub Secrets]
+  Render[scripts/render-env.sh]
+  Env[uni-chat-backend/.env]
+  Compose[docker compose up]
+
+  GH -->|vars en el job| Render
+  Render --> Env
+  Env --> Compose
+```
+
 ## Dónde crear los secrets
 
-1. Repositorio en GitHub → **Settings** → **Secrets and variables** → **Actions**
-2. **New repository secret** por cada fila de la tabla (mismo nombre que la variable)
-3. Para entornos distintos (staging/producción), usar **Environments** con secrets por entorno
+1. Repositorio → **Settings** → **Secrets and variables** → **Actions**
+2. **New repository secret** por cada fila (mismo nombre que la variable)
+3. Para staging/producción distintos, usar **Environments** con secrets por entorno
 
 ## Tabla: Secret de GitHub → variable `.env`
+
+Validada contra [`scripts/render-env.sh`](https://github.com/DaR3kDev/uni-chat-backend/blob/main/scripts/render-env.sh):
 
 | Secret (GitHub) | Variable en `.env` | Obligatorio | Uso |
 |-----------------|-------------------|-------------|-----|
@@ -36,38 +52,38 @@ Los secretos **nunca** se guardan en el repositorio. Se configuran en GitHub y s
 | `CLOUDINARY_CLOUD_NAME` | `CLOUDINARY_CLOUD_NAME` | Sí | Cloudinary |
 | `CLOUDINARY_API_KEY` | `CLOUDINARY_API_KEY` | Sí | Cloudinary |
 | `CLOUDINARY_API_SECRET` | `CLOUDINARY_API_SECRET` | Sí | Cloudinary |
-| `ENABLE_DOCS` | `ENABLE_DOCS` | No | Swagger/OpenAPI en contenedor |
+| `ENABLE_DOCS` | `ENABLE_DOCS` | No | OpenAPI/Scalar en contenedor |
 | `MONGO_EXPRESS_USER` | `MONGO_EXPRESS_USER` | No | Panel mongo-express |
 | `MONGO_EXPRESS_PASS` | `MONGO_EXPRESS_PASS` | No | Panel mongo-express |
 | `SEQ_ADMIN` | `SEQ_ADMIN` | No | Seq (logs) |
 | `SEQ_ADMIN_PASSWORD` | `SEQ_ADMIN_PASSWORD` | No | Seq (logs) |
 
-Los nombres del secret y de la variable `.env` coinciden a propósito para simplificar el deploy.
+Los nombres del secret y de la variable `.env` coinciden a propósito.
 
 ## Generar `.env` en un runner o servidor
 
-Script: [`scripts/render-env.sh`](../scripts/render-env.sh)
+Script: [`scripts/render-env.sh`](https://github.com/DaR3kDev/uni-chat-backend/blob/main/scripts/render-env.sh)
 
-Desde la raíz del repo, con variables ya exportadas (p. ej. inyectadas por GitHub Actions):
+Con variables exportadas (p. ej. inyectadas por GitHub Actions):
 
 ```yaml
 # Ejemplo futuro — job deploy
 env:
   JWT_KEY: ${{ secrets.JWT_KEY }}
   MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
-  # ... resto de secrets con el mismo nombre
+  # ... resto con el mismo nombre
 steps:
   - run: ./scripts/render-env.sh
   - run: cd uni-chat-backend && docker compose up -d
 ```
 
-Solo validar que existen todas las obligatorias (sin escribir archivo):
+Solo validar obligatorias (sin escribir archivo):
 
 ```bash
 ./scripts/render-env.sh --check
 ```
 
-Desde `uni-chat-backend/`:
+Desde `uni-chat-backend/uni-chat-backend/`:
 
 ```bash
 make env-from-ci
@@ -75,13 +91,13 @@ make env-from-ci
 
 ## Desarrollo local sin GitHub
 
-- Plantilla vacía: [`.env.example`](../uni-chat-backend/.env.example) → `make setup`
-- Valores dummy: [`.env.ci.example`](../uni-chat-backend/.env.ci.example) → `cp .env.ci.example .env` (no usar en producción)
+- Plantilla vacía: [`.env.example`](https://github.com/DaR3kDev/uni-chat-backend/blob/main/uni-chat-backend/.env.example) → `make setup`
+- Valores dummy: [`.env.ci.example`](https://github.com/DaR3kDev/uni-chat-backend/blob/main/uni-chat-backend/.env.ci.example) → `cp .env.ci.example .env` (no usar en producción)
 
 ## CI actual (backend)
 
-El workflow [`.github/workflows/ci-cd-backend.yml`](../.github/workflows/ci-cd-backend.yml) **no requiere** estos secrets: compila y ejecuta tests sin levantar Mongo/Redis/Rabbit.
+El workflow [ci-cd-backend.yml](https://github.com/DaR3kDev/uni-chat-backend/blob/main/.github/workflows/ci-cd-backend.yml) **no requiere** estos secrets: compila y ejecuta tests sin levantar Mongo/Redis/Rabbit. Ver [CI/CD]({{ site.baseurl }}/cicd.html).
 
 ## Pre-commit
 
-Tras `make install-hooks`, un `git commit` rechaza archivos `.env` en staging y ejecuta `make pre-commit` (lint + build + test).
+Tras `make install-hooks`, un `git commit` rechaza `.env` en staging y ejecuta `make pre-commit` (lint + build + test).

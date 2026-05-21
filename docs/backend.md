@@ -7,93 +7,64 @@ description: Documentación técnica del backend de Uni Chat.
 
 # Uni Chat Backend
 
-API de chat en tiempo real con ASP.NET Core, autenticación JWT, mensajería asíncrona y persistencia distribuida.
+API de chat en tiempo real con ASP.NET Core, autenticación JWT, mensajería asíncrona y persistencia en MongoDB.
 
-**Stack:** .NET 10 · SignalR · MongoDB · Redis · RabbitMQ
+**Stack:** .NET 10 · SignalR · MongoDB · Redis · RabbitMQ · Cloudinary
 
-## Responsabilidad y objetivo
+## Responsabilidad
 
-- **Responsabilidad:** autenticación, conversaciones, mensajes y eventos en tiempo real.
-- **Objetivo técnico:** escalar con baja latencia y mantener seguridad extremo a extremo.
-
-## Descripción funcional
-
-La API cubre:
-
-- Autenticación de usuarios (registro, login, refresh, logout, perfil).
-- Gestión de contactos.
-- Conversaciones directas.
-- Envío y consulta de mensajes (texto y archivos).
-- Eventos realtime (typing, delivered, read).
+- Autenticación (registro, login, refresh, logout, perfil).
+- Contactos y conversaciones directas.
+- Mensajes (texto cifrado y archivos vía Cloudinary).
+- Eventos en tiempo real (typing, delivered, read).
 
 ## Stack tecnológico
 
 | Área | Tecnología |
 |------|------------|
 | Runtime | .NET 10 (`net10.0`) |
-| Framework | ASP.NET Core Minimal API + SignalR |
-| Persistencia | MongoDB + Cloudinary |
-| Infra | Redis + RabbitMQ |
-| Arquitectura | MediatR + FluentValidation + Mapster |
-| Documentación API | OpenAPI + Scalar |
+| API | ASP.NET Core Minimal API + SignalR |
+| Casos de uso | **MediatR** (commands/queries) + **Wolverine** (eventos/colas) |
+| Validación / mapeo | FluentValidation, Mapster |
+| Persistencia | MongoDB |
+| Caché | Redis (StackExchange.Redis) |
+| Colas | RabbitMQ (vía WolverineFx) |
+| Logs | Serilog + Seq (Docker) |
+| Documentación API | OpenAPI + Scalar (`/scalar/v1`) |
 
-## Estructura principal
+## Estructura del proyecto
 
-Directorio `uni-chat-backend/`:
+Directorio `uni-chat-backend/` (proyecto .NET):
 
-- `API/`: endpoints HTTP, hub y middlewares.
-- `Application/`: comportamientos transversales.
-- `Domain/`: entidades y enums.
-- `Features/`: casos de uso por módulo.
-- `Infrastructure/`: persistencia, seguridad y DI.
-- `Program.cs`: composición de servicios.
+| Carpeta | Contenido |
+|---------|-----------|
+| `API/` | Endpoints HTTP, configuración de middleware, hub SignalR |
+| `Application/` | Comportamientos transversales (pipeline MediatR) |
+| `Domain/` | Entidades y enums |
+| `Features/` | Vertical slices: Auth, Contacts, Conversations, Messages |
+| `Infrastructure/` | Repositorios, seguridad (`E2EEncryptionService`), DI, SignalR |
+| `Program.cs` | Composición de servicios y arranque |
 
-## Requisitos previos
-
-- .NET SDK 10
-- Docker + Docker Compose
+Todos los comandos `make` y `docker compose` se ejecutan desde **`uni-chat-backend/uni-chat-backend/`**. Guía completa: [Instalación]({{ site.baseurl }}/instalacion.html).
 
 ## Configuración local
 
-1. Copiar variables de entorno:
-
 ```bash
-cd uni-chat-backend
-cp .env.example .env
+cd uni-chat-backend/uni-chat-backend
+cp .env.ci.example .env
+# Ajustar appsettings.json (localhost) y Cloudinary en .env si hace falta
+make up
+make run
 ```
 
-2. Configurar `appsettings.json`:
+Claves en `appsettings.json` (API en el host): `Mongo`, `Redis`, `RabbitMQ`, `Jwt`, `RefreshToken`, `Cloudinary`.
 
-- `Mongo.ConnectionString`
-- `Mongo.Database`
-- `Redis.ConnectionString`
-- `Jwt.Key`, `Jwt.Issuer`, `Jwt.Audience`
-- `RefreshToken.ExpireDays`
-- `Cloudinary.CloudName`, `Cloudinary.ApiKey`, `Cloudinary.ApiSecret`
-
-## Levantar dependencias
-
-```bash
-docker compose up -d
-```
-
-> **Info:** Servicios: MongoDB, Redis, RabbitMQ y paneles de administración asociados.
-
-## Ejecutar API
-
-```bash
-dotnet restore
-dotnet run
-```
-
-URLs locales: `http://localhost:5012` y `https://localhost:7155`.
-
-## Endpoints principales
+## Endpoints HTTP
 
 ### Auth
 
-| Método | Endpoint |
-| --- | --- |
+| Método | Ruta |
+|--------|------|
 | `POST` | `/api/auth/register` |
 | `POST` | `/api/auth/login` |
 | `GET` | `/api/auth/me` |
@@ -102,43 +73,61 @@ URLs locales: `http://localhost:5012` y `https://localhost:7155`.
 
 ### Contacts
 
-| Método | Endpoint |
-| --- | --- |
+| Método | Ruta |
+|--------|------|
 | `POST` | `/api/contacts` |
 | `GET` | `/api/contacts` |
 | `DELETE` | `/api/contacts/{contactId:guid}` |
 
 ### Conversations
 
-| Método | Endpoint |
-| --- | --- |
+| Método | Ruta |
+|--------|------|
 | `POST` | `/api/conversations/direct` |
 | `GET` | `/api/conversations` |
 | `POST` | `/api/conversations/{conversationId:guid}/join` |
 
 ### Messages
 
-| Método | Endpoint |
-| --- | --- |
+| Método | Ruta |
+|--------|------|
 | `POST` | `/api/messages/send` |
 | `POST` | `/api/messages/upload` |
 | `GET` | `/api/messages/conversation/{conversationId:guid}` |
 | `DELETE` | `/api/messages/{messageId:guid}` |
 
-## Realtime con SignalR
+Requiere cabecera `Authorization: Bearer <token>` salvo registro/login.
 
-- Hub: `/messages/chat`
-- Requiere autenticación (`[Authorize]`)
+## SignalR
 
-Métodos clave: `JoinConversation`, `SendMessage`, `TypingStarted`, `TypingStopped`, `MessageDelivered`, `MessageRead`.
+- **Hub:** `/messages/chat`
+- **Autenticación:** JWT (`[Authorize]`)
 
-## Flujo recomendado de inicio
+Métodos del hub (`ChatHub`):
 
-1. `docker compose up -d`
-2. Configurar `appsettings.json`
-3. `dotnet run`
-4. Registrar o iniciar sesión
-5. Crear conversación
-6. Enviar mensajes por HTTP o SignalR
+| Método | Descripción |
+|--------|-------------|
+| `JoinConversation` | Unirse al grupo de la conversación |
+| `LeaveConversation` | Salir del grupo |
+| `SendMessage` | Enviar mensaje (delega en `SendMessageCommand` / MediatR) |
+| `TypingStarted` / `TypingStopped` | Indicador de escritura |
+| `MessageDelivered` / `MessageRead` | Estados de entrega y lectura |
 
-> **Nota:** No subas secretos reales (`.env`, JWT, credenciales Cloudinary) al repositorio.
+Eventos hacia el cliente incluyen `ReceiveMessage`, `UserTyping`, `MessageDelivered`, `MessageRead`, `JoinedConversation`.
+
+Conexión: misma base URL que la API; negociar token en la conexión SignalR según tu cliente.
+
+## Cifrado (E2EE)
+
+Los mensajes de texto se cifran con **AES-256** y clave por conversación antes de guardarse en MongoDB. Detalle: [E2EE]({{ site.baseurl }}/chat-privado/e2ee.html).
+
+## Flujo recomendado
+
+1. `make up` — infra en Docker
+2. Configurar `appsettings.json` y `.env`
+3. `make run` — API en http://localhost:5012
+4. Abrir Scalar: http://localhost:5012/scalar/v1
+5. Registrar usuario, crear conversación, enviar mensajes por HTTP o hub
+
+{: .important }
+> **Importante:** No subas `.env`, claves JWT ni credenciales Cloudinary al repositorio. Producción: [CI/CD y secrets]({{ site.baseurl }}/github-secrets.html).

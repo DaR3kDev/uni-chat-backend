@@ -6,8 +6,15 @@ remote_theme: just-the-docs/just-the-docs@v0.10.0
 color_scheme: light
 search_enabled: true
 heading_anchors: true
+last_modified_timestamp: true
+
 aux_links:
   Repositorio: "https://github.com/DaR3kDev/uni-chat-backend"
+  README: "https://github.com/DaR3kDev/uni-chat-backend/blob/main/README.md"
+  Issues: "https://github.com/DaR3kDev/uni-chat-backend/issues"
+  GHCR: "https://github.com/DaR3kDev/uni-chat-backend/pkgs/container/uni-chat-backend"
+
+footer_content: "Backend ASP.NET Core 10 · <a href=\"{{ '/contribuir-docs.html' | relative_url }}\">Editar esta documentación</a>"
 
 exclude:
   - node_modules
@@ -22,3 +29,4 @@ exclude:
   - README.md
   - GUIA-INSTALACION.md
   - PAGES.md
+  - frontend.md
