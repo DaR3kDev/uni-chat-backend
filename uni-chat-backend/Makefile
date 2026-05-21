@@ -72,64 +72,138 @@ help: ## Muestra todos los comandos y sus descripciones en español
 
 # --- Configuración ---
 
-setup: ## Crea .env y .env.dotnet desde sus archivos example si no existen (mensajes en español)
+setup: ## Crea .env y appsettings.Development.json automáticamente
+	@$(call print_header,"⚙️ Configuración Inicial","═════════════════════════════════════════")
+
+	@# =========================================================
+	@# Verificar .env.example
+	@# =========================================================
+	@if [ ! -f .env.example ]; then \
+		echo "\033[31mNo se encontró .env.example.\033[0m"; \
+		exit 1; \
+	fi
+
+	@# =========================================================
+	@# Crear .env
+	@# =========================================================
 	@if [ -f .env ]; then \
 		echo "\033[33mYa existe .env — no se ha modificado nada.\033[0m"; \
 	else \
-		cp .env.example .env && echo "\033[32mArchivo .env creado. Edítalo con tus credenciales antes de \`make up\`.\033[0m"; \
+		cp .env.example .env; \
+		echo "\033[32mArchivo .env creado. Edítalo con tus credenciales antes de \`make up\`.\033[0m"; \
 	fi
 
-	@if [ -f .env.dotnet ]; then \
-		echo "\033[33mYa existe .env.dotnet — no se ha modificado nada.\033[0m"; \
-	else \
-		cp .env.dotnet.example .env.dotnet && echo "\033[32mArchivo .env.dotnet creado para IConfiguration Binding.\033[0m"; \
-	fi
+	@# =========================================================
+	@# Generar appsettings.Development.json
+	@# =========================================================
+	@set -a; \
+	. ./.env; \
+	set +a; \
+	printf '%s\n' '{' \
+	'  "AllowedHosts": "*",' \
+	'  "Logging": {' \
+	'    "LogLevel": {' \
+	'      "Default": "Information",' \
+	'      "Microsoft.AspNetCore": "Warning"' \
+	'    }' \
+	'  },' \
+	'  "Serilog": {' \
+	'    "MinimumLevel": {' \
+	'      "Default": "Information",' \
+	'      "Override": {' \
+	'        "Microsoft": "Warning",' \
+	'        "System": "Warning"' \
+	'      }' \
+	'    }' \
+	'  },' \
+	'  "Mongo": {' \
+	'    "ConnectionString": "'"$$MONGO_CONNECTION_STRING"'",' \
+	'    "Database": "'"$$MONGO_DATABASE"'"' \
+	'  },' \
+	'  "RabbitMQ": {' \
+	'    "ConnectionString": "'"$$RABBITMQ_CONNECTION_STRING"'"' \
+	'  },' \
+	'  "Redis": {' \
+	'    "ConnectionString": "'"$$REDIS_CONNECTION_STRING"'"' \
+	'  },' \
+	'  "Jwt": {' \
+	'    "Key": "'"$$JWT_KEY"'",' \
+	'    "Issuer": "'"$$JWT_ISSUER"'",' \
+	'    "Audience": "'"$$JWT_AUDIENCE"'",' \
+	'    "ExpireMinutes": '"$$JWT_EXPIRE_MINUTES"'' \
+	'  },' \
+	'  "RefreshToken": {' \
+	'    "ExpireDays": '"$$REFRESH_EXPIRE_DAYS"'' \
+	'  },' \
+	'  "Cloudinary": {' \
+	'    "CloudName": "'"$$CLOUDINARY_CLOUD_NAME"'",' \
+	'    "ApiKey": "'"$$CLOUDINARY_API_KEY"'",' \
+	'    "ApiSecret": "'"$$CLOUDINARY_API_SECRET"'"' \
+	'  },' \
+	'  "EnableDocs": true' \
+	'}' > appsettings.Development.json; \
+	echo "\033[32mArchivo appsettings.Development.json generado automáticamente.\033[0m"
 
-setup-interactive: ## Pregunta en español si .env o .env.dotnet existen: omitir, respaldar o sobrescribir
+setup-interactive: ## Pregunta en español si .env existe: omitir, respaldar o sobrescribir
 	@if [ -z "$$CI" ] || [ "$$CI" != "true" ]; then \
 
 		if [ ! -f .env.example ]; then \
-			echo "\033[31mNo se encontró .env.example.\033[0m"; exit 1; \
+			echo "\033[31mNo se encontró .env.example.\033[0m"; \
+			exit 1; \
 		fi; \
 
-		if [ ! -f .env.dotnet.example ]; then \
-			echo "\033[31mNo se encontró .env.dotnet.example.\033[0m"; exit 1; \
-		fi; \
-
-		# =========================
-		# .env
-		# =========================
+		# ========================================================= \
+		# .env \
+		# ========================================================= \
 		if [ ! -f .env ]; then \
-			cp .env.example .env && echo "\033[32mArchivo .env creado desde .env.example.\033[0m"; \
+			cp .env.example .env; \
+			echo "\033[32mArchivo .env creado desde .env.example.\033[0m"; \
 		else \
 			echo "\033[33mYa existe un archivo .env.\033[0m"; \
-			read -r -p "¿Qué deseas hacer con .env? [1=omitir / 2=respaldar .env y crear nuevo / 3=salir]: " choice; \
+			read -r -p "¿Qué deseas hacer con .env? [1=omitir / 2=respaldar y crear nuevo / 3=salir]: " choice; \
 			case "$$choice" in \
 				1) echo "Sin cambios en .env." ;; \
-				2) cp .env ".env.backup.$$(date +%Y%m%d%H%M%S)" && \
-				   cp .env.example .env && \
-				   echo "\033[32mRespaldo creado y nuevo .env generado desde .env.example.\033[0m" ;; \
+				2) cp .env ".env.backup.$$(date +%Y%m%d%H%M%S)"; \
+				   cp .env.example .env; \
+				   echo "\033[32mRespaldo creado y nuevo .env generado.\033[0m" ;; \
 				3|*) echo "Operación finalizada."; exit 0 ;; \
 			esac; \
 		fi; \
 
-		# =========================
-		# .env.dotnet
-		# =========================
-		if [ ! -f .env.dotnet ]; then \
-			cp .env.dotnet.example .env.dotnet && \
-			echo "\033[32mArchivo .env.dotnet creado desde .env.dotnet.example.\033[0m"; \
-		else \
-			echo "\033[33mYa existe un archivo .env.dotnet.\033[0m"; \
-			read -r -p "¿Qué deseas hacer con .env.dotnet? [1=omitir / 2=respaldar .env.dotnet y crear nuevo / 3=salir]: " choice; \
-			case "$$choice" in \
-				1) echo "Sin cambios en .env.dotnet." ;; \
-				2) cp .env.dotnet ".env.dotnet.backup.$$(date +%Y%m%d%H%M%S)" && \
-				   cp .env.dotnet.example .env.dotnet && \
-				   echo "\033[32mRespaldo creado y nuevo .env.dotnet generado desde .env.dotnet.example.\033[0m" ;; \
-				3|*) echo "Operación finalizada."; exit 0 ;; \
-			esac; \
-		fi; \
+		# ========================================================= \
+		# Generar appsettings.Development.json \
+		# ========================================================= \
+		set -a; \
+		. ./.env; \
+		set +a; \
+		printf '%s\n' '{' \
+		'  "Mongo": {' \
+		'    "ConnectionString": "'"$$MONGO_CONNECTION_STRING"'",' \
+		'    "Database": "'"$$MONGO_DATABASE"'"' \
+		'  },' \
+		'  "Redis": {' \
+		'    "ConnectionString": "'"$$REDIS_CONNECTION_STRING"'"' \
+		'  },' \
+		'  "RabbitMQ": {' \
+		'    "ConnectionString": "'"$$RABBITMQ_CONNECTION_STRING"'"' \
+		'  },' \
+		'  "Jwt": {' \
+		'    "Key": "'"$$JWT_KEY"'",' \
+		'    "Issuer": "'"$$JWT_ISSUER"'",' \
+		'    "Audience": "'"$$JWT_AUDIENCE"'",' \
+		'    "ExpireMinutes": '"$$JWT_EXPIRE_MINUTES"'' \
+		'  },' \
+		'  "RefreshToken": {' \
+		'    "ExpireDays": '"$$REFRESH_EXPIRE_DAYS"'' \
+		'  },' \
+		'  "Cloudinary": {' \
+		'    "CloudName": "'"$$CLOUDINARY_CLOUD_NAME"'",' \
+		'    "ApiKey": "'"$$CLOUDINARY_API_KEY"'",' \
+		'    "ApiSecret": "'"$$CLOUDINARY_API_SECRET"'"' \
+		'  },' \
+		'  "EnableDocs": true' \
+		'}' > appsettings.Development.json; \
+		echo "\033[32mArchivo appsettings.Development.json generado automáticamente.\033[0m"; \
 
 	else \
 		echo "\033[33mCI=true: se omite setup-interactive (no hay terminal interactiva).\033[0m"; \
