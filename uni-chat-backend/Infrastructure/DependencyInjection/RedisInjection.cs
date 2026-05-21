@@ -1,23 +1,22 @@
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using uni_chat_backend.Infrastructure.Settings;
 
 namespace uni_chat_backend.Infrastructure.DependencyInjection;
 
 public static class RedisInjection
 {
-    public static void AddRedis(this IServiceCollection services,
-        IConfiguration configuration)
+    public static void AddRedis(this IServiceCollection services)
     {
-        services.AddSingleton<IConnectionMultiplexer>(_ =>
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
-            var connectionString =
-                configuration["Redis:ConnectionString"];
+            var settings = sp.GetRequiredService<IOptions<RedisSettings>>().Value;
 
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException(
-                    "Redis ConnectionString is not configured"
-                );
+            var connectionString = settings.ConnectionString;
 
-            return ConnectionMultiplexer.Connect(connectionString);
+            return string.IsNullOrWhiteSpace(connectionString)
+                ? throw new InvalidOperationException("Redis ConnectionString is not configured")
+                : ConnectionMultiplexer.Connect(connectionString.Trim());
         });
     }
 }

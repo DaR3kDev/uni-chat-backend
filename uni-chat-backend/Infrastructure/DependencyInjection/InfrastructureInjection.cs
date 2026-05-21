@@ -10,7 +10,7 @@ public static class InfrastructureInjection
 
         services.AddConfigurations(configuration);
         services.AddMongoDatabase();
-        services.AddRedis(configuration);
+        services.AddRedis();
         services.AddJwtAuthentication(configuration);
         services.AddRepositories();
         services.AddApplicationBehaviors();

@@ -6,6 +6,7 @@ using MongoDB.Driver;
 using uni_chat_backend.Infrastructure.Persistence;
 using uni_chat_backend.Infrastructure.Persistence.Collections;
 using uni_chat_backend.Infrastructure.Persistence.Indexes.Initialization;
+using uni_chat_backend.Infrastructure.Settings;
 
 namespace uni_chat_backend.Infrastructure.DependencyInjection;
 

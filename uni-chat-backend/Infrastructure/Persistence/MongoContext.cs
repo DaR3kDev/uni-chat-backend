@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using uni_chat_backend.Infrastructure.Settings;
 
 namespace uni_chat_backend.Infrastructure.Persistence;
 
