@@ -1,0 +1,24 @@
+title: Documentación Uni Chat
+description: Base de conocimiento del backend
+url: "https://dar3kdev.github.io"
+baseurl: "/uni-chat-backend"
+remote_theme: just-the-docs/just-the-docs@v0.10.0
+color_scheme: light
+search_enabled: true
+heading_anchors: true
+aux_links:
+  Repositorio: "https://github.com/DaR3kDev/uni-chat-backend"
+
+exclude:
+  - node_modules
+  - package.json
+  - package-lock.json
+  - bun.lock
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .jekyll-cache
+  - _site
+  - README.md
+  - GUIA-INSTALACION.md
+  - PAGES.md
