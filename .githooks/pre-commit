@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+# Pre-commit: bloquea .env en staging y ejecuta lint + build + test.
+set -eu
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+STAGED_BAD="$(git diff --cached --name-only | grep -E '\.env$|\.env\.local$|\.env\.production\.local$' | grep -vE '\.env\.example$|\.env\.ci\.example$' || true)"
+if [ -n "$STAGED_BAD" ]; then
+  echo "Error: no puedes commitear archivos .env con secretos." >&2
+  echo "$STAGED_BAD" | sed 's/^/  - /' >&2
+  echo "Usa .env.example o .env.ci.example como plantilla." >&2
+  exit 1
+fi
+
+export CI=true
+cd uni-chat-backend
+echo "Ejecutando pre-commit: make pre-commit..."
+make pre-commit

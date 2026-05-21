@@ -39,7 +39,9 @@
       "last 5 safari version"
     ]
   },
+  "packageManager": "bun@1.2.23",
   "engines": {
-    "node": ">=20.0"
+    "node": ">=20.0",
+    "bun": "1.2.23"
   }
 }

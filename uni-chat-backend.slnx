@@ -1,3 +1,4 @@
 <Solution>
     <Project Path="uni-chat-backend/uni-chat-backend.csproj"/>
+    <Project Path="uni-chat-backend/uni-chat-backend.Tests/uni-chat-backend.Tests.csproj"/>
 </Solution>

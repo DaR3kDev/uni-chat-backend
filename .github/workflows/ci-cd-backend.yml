@@ -1,162 +1,64 @@
-# =========================================================
-# CI/CD Workflow para Backend ASP.NET Core
-# =========================================================
-# Este workflow realiza:
-# 1. Restore de dependencias
-# 2. Build del proyecto
-# 3. Ejecución de tests
-# 4. Build de imagen Docker
-# 5. Push a GitHub Container Registry (GHCR)
-# =========================================================
+# CI: lint + build + test en cada push/PR. CD (imagen Docker): solo push a main.
+# Deploy futuro: inyectar secrets.* en el job y ejecutar scripts/render-env.sh (ver docs/github-secrets.md).
 
 name: CI/CD Backend
 
-# =========================================================
-# EVENTOS
-# =========================================================
 on:
   push:
-    branches:
-      - main
-
   pull_request:
-    branches:
-      - main
 
-# =========================================================
-# VARIABLES GLOBALES
-# =========================================================
+concurrency:
+  group: ci-backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: uni-chat-backend
 
-# =========================================================
-# JOBS
-# =========================================================
 jobs:
-  # =======================================================
-  # JOB: CONTINUOUS INTEGRATION
-  # =======================================================
   ci:
-    name: Build & Test
-    runs-on: ubuntu-latest
-
+    name: Lint, build y test
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: uni-chat-backend
+    env:
+      CI: true
     steps:
-      # ===================================================
-      # CHECKOUT DEL REPOSITORIO
-      # ===================================================
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # ===================================================
-      # INSTALAR .NET SDK
-      # ===================================================
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
-      # ===================================================
-      # RESTORE
-      # ===================================================
-      - name: Restore de dependencias
-        run: dotnet restore uni-chat-backend/uni-chat-backend.csproj
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-      # ===================================================
-      # BUILD
-      # ===================================================
-      - name: Build del proyecto
-        run: |
-          dotnet build \
-          uni-chat-backend/uni-chat-backend.csproj \
-          --configuration Release \
-          --no-restore
+      - name: CI (make ci)
+        run: make ci
 
-      # ===================================================
-      # TESTS
-      # ===================================================
-      # Aquí se inyectan TODOS los secrets
-      # necesarios para que la aplicación pueda
-      # arrancar correctamente durante los tests
-      # ===================================================
-      - name: Ejecutar tests
-        env:
-          # =========================
-          # MONGO
-          # =========================
-          Mongo__ConnectionString: ${{ secrets.MONGO_CONNECTION_STRING }}
-          Mongo__Database: ${{ secrets.MONGO_DATABASE }}
-
-          # =========================
-          # REDIS
-          # =========================
-          Redis__ConnectionString: ${{ secrets.REDIS_CONNECTION_STRING }}
-
-          # =========================
-          # RABBITMQ
-          # =========================
-          RabbitMQ__ConnectionString: ${{ secrets.RABBITMQ_CONNECTION_STRING }}
-          RabbitMQ__User: ${{ secrets.RABBITMQ_USER }}
-          RabbitMQ__Pass: ${{ secrets.RABBITMQ_PASS }}
-
-          # =========================
-          # JWT
-          # =========================
-          Jwt__Key: ${{ secrets.JWT_KEY }}
-          Jwt__Issuer: ${{ secrets.JWT_ISSUER }}
-          Jwt__Audience: ${{ secrets.JWT_AUDIENCE }}
-          Jwt__ExpireMinutes: ${{ secrets.JWT_EXPIRE_MINUTES }}
-
-          # =========================
-          # REFRESH TOKEN
-          # =========================
-          Refresh__ExpireDays: ${{ secrets.REFRESH_EXPIRE_DAYS }}
-
-          # =========================
-          # CLOUDINARY
-          # =========================
-          Cloudinary__CloudName: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          Cloudinary__ApiKey: ${{ secrets.CLOUDINARY_API_KEY }}
-          Cloudinary__ApiSecret: ${{ secrets.CLOUDINARY_API_SECRET }}
-
-        run: |
-          dotnet test \
-          uni-chat-backend/uni-chat-backend.csproj \
-          --no-build \
-          --configuration Release
-
-  # =======================================================
-  # JOB: DOCKER BUILD & PUSH
-  # =======================================================
   docker:
-    name: Docker Build & Push
-
-    # Solo ejecuta si CI pasó
+    name: Build y push imagen Docker
     needs: ci
-
-    runs-on: ubuntu-latest
-
-    # Permisos necesarios para GHCR
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
-
     steps:
-      # ===================================================
-      # CHECKOUT
-      # ===================================================
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # ===================================================
-      # SETUP DOCKER BUILDX
-      # ===================================================
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # ===================================================
-      # LOGIN A GHCR
-      # ===================================================
       - name: Login a GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -164,42 +66,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ===================================================
-      # METADATA
-      # ===================================================
-      - name: Extraer metadata Docker
+      - name: Extraer metadatos de Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
-
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
-
-            # latest/main
             type=ref,event=branch
-
-            # sha commit
             type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
 
-      # ===================================================
-      # BUILD & PUSH
-      # ===================================================
       - name: Build y Push de imagen Docker
         uses: docker/build-push-action@v5
         with:
-          # Carpeta donde está el Dockerfile
           context: ./uni-chat-backend
-
-          # Publicar imagen
           push: true
-
-          # Tags automáticos
           tags: ${{ steps.meta.outputs.tags }}
-
-          # Labels automáticos
           labels: ${{ steps.meta.outputs.labels }}
-
-          # Cache Docker
           cache-from: type=gha
           cache-to: type=gha,mode=max
