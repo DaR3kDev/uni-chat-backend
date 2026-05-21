@@ -96,10 +96,9 @@ setup: ## Crea .env y appsettings.Development.json automáticamente
 	@# =========================================================
 	@# Generar appsettings.Development.json
 	@# =========================================================
-	@set -a; \
-	. ./.env; \
-	set +a; \
-	printf '%s\n' '{' \
+	@export $$(grep -v '^#' .env | xargs) && \
+	printf '%s\n' \
+	'{' \
 	'  "AllowedHosts": "*",' \
 	'  "Logging": {' \
 	'    "LogLevel": {' \
@@ -141,7 +140,7 @@ setup: ## Crea .env y appsettings.Development.json automáticamente
 	'    "ApiSecret": "'"$$CLOUDINARY_API_SECRET"'"' \
 	'  },' \
 	'  "EnableDocs": true' \
-	'}' > appsettings.Development.json; \
+	'}' > appsettings.Development.json && \
 	echo "\033[32mArchivo appsettings.Development.json generado automáticamente.\033[0m"
 
 setup-interactive: ## Pregunta en español si .env existe: omitir, respaldar o sobrescribir
@@ -173,19 +172,34 @@ setup-interactive: ## Pregunta en español si .env existe: omitir, respaldar o s
 		# ========================================================= \
 		# Generar appsettings.Development.json \
 		# ========================================================= \
-		set -a; \
-		. ./.env; \
-		set +a; \
-		printf '%s\n' '{' \
+		export $$(grep -v '^#' .env | xargs) && \
+		printf '%s\n' \
+		'{' \
+		'  "AllowedHosts": "*",' \
+		'  "Logging": {' \
+		'    "LogLevel": {' \
+		'      "Default": "Information",' \
+		'      "Microsoft.AspNetCore": "Warning"' \
+		'    }' \
+		'  },' \
+		'  "Serilog": {' \
+		'    "MinimumLevel": {' \
+		'      "Default": "Information",' \
+		'      "Override": {' \
+		'        "Microsoft": "Warning",' \
+		'        "System": "Warning"' \
+		'      }' \
+		'    }' \
+		'  },' \
 		'  "Mongo": {' \
 		'    "ConnectionString": "'"$$MONGO_CONNECTION_STRING"'",' \
 		'    "Database": "'"$$MONGO_DATABASE"'"' \
 		'  },' \
-		'  "Redis": {' \
-		'    "ConnectionString": "'"$$REDIS_CONNECTION_STRING"'"' \
-		'  },' \
 		'  "RabbitMQ": {' \
 		'    "ConnectionString": "'"$$RABBITMQ_CONNECTION_STRING"'"' \
+		'  },' \
+		'  "Redis": {' \
+		'    "ConnectionString": "'"$$REDIS_CONNECTION_STRING"'"' \
 		'  },' \
 		'  "Jwt": {' \
 		'    "Key": "'"$$JWT_KEY"'",' \
@@ -202,7 +216,7 @@ setup-interactive: ## Pregunta en español si .env existe: omitir, respaldar o s
 		'    "ApiSecret": "'"$$CLOUDINARY_API_SECRET"'"' \
 		'  },' \
 		'  "EnableDocs": true' \
-		'}' > appsettings.Development.json; \
+		'}' > appsettings.Development.json && \
 		echo "\033[32mArchivo appsettings.Development.json generado automáticamente.\033[0m"; \
 
 	else \
