@@ -75,29 +75,65 @@ help: ## Muestra todos los comandos y sus descripciones en español
 
 # --- Configuración ---
 
-setup: ## Crea .env desde .env.example si no existe (mensajes en español)
+setup: ## Crea .env y .env.dotnet desde sus archivos example si no existen (mensajes en español)
 	@if [ -f .env ]; then \
 		echo "\033[33mYa existe .env — no se ha modificado nada.\033[0m"; \
 	else \
 		cp .env.example .env && echo "\033[32mArchivo .env creado. Edítalo con tus credenciales antes de \`make up\`.\033[0m"; \
 	fi
 
-setup-interactive: ## Pregunta en español si .env existe: omitir, respaldar o sobrescribir
+	@if [ -f .env.dotnet ]; then \
+		echo "\033[33mYa existe .env.dotnet — no se ha modificado nada.\033[0m"; \
+	else \
+		cp .env.dotnet.example .env.dotnet && echo "\033[32mArchivo .env.dotnet creado para IConfiguration Binding.\033[0m"; \
+	fi
+
+setup-interactive: ## Pregunta en español si .env o .env.dotnet existen: omitir, respaldar o sobrescribir
 	@if [ -z "$$CI" ] || [ "$$CI" != "true" ]; then \
+
 		if [ ! -f .env.example ]; then \
 			echo "\033[31mNo se encontró .env.example.\033[0m"; exit 1; \
 		fi; \
+
+		if [ ! -f .env.dotnet.example ]; then \
+			echo "\033[31mNo se encontró .env.dotnet.example.\033[0m"; exit 1; \
+		fi; \
+
+		# =========================
+		# .env
+		# =========================
 		if [ ! -f .env ]; then \
 			cp .env.example .env && echo "\033[32mArchivo .env creado desde .env.example.\033[0m"; \
 		else \
 			echo "\033[33mYa existe un archivo .env.\033[0m"; \
-			read -r -p "¿Qué deseas hacer? [1=omitir / 2=respaldar .env y crear nuevo / 3=salir]: " choice; \
+			read -r -p "¿Qué deseas hacer con .env? [1=omitir / 2=respaldar .env y crear nuevo / 3=salir]: " choice; \
 			case "$$choice" in \
-				1) echo "Sin cambios." ;; \
-				2) cp .env ".env.backup.$$(date +%Y%m%d%H%M%S)" && cp .env.example .env && echo "\033[32mRespaldo creado y nuevo .env generado desde .env.example.\033[0m" ;; \
-				3|*) echo "Operación finalizada." ;; \
+				1) echo "Sin cambios en .env." ;; \
+				2) cp .env ".env.backup.$$(date +%Y%m%d%H%M%S)" && \
+				   cp .env.example .env && \
+				   echo "\033[32mRespaldo creado y nuevo .env generado desde .env.example.\033[0m" ;; \
+				3|*) echo "Operación finalizada."; exit 0 ;; \
 			esac; \
 		fi; \
+
+		# =========================
+		# .env.dotnet
+		# =========================
+		if [ ! -f .env.dotnet ]; then \
+			cp .env.dotnet.example .env.dotnet && \
+			echo "\033[32mArchivo .env.dotnet creado desde .env.dotnet.example.\033[0m"; \
+		else \
+			echo "\033[33mYa existe un archivo .env.dotnet.\033[0m"; \
+			read -r -p "¿Qué deseas hacer con .env.dotnet? [1=omitir / 2=respaldar .env.dotnet y crear nuevo / 3=salir]: " choice; \
+			case "$$choice" in \
+				1) echo "Sin cambios en .env.dotnet." ;; \
+				2) cp .env.dotnet ".env.dotnet.backup.$$(date +%Y%m%d%H%M%S)" && \
+				   cp .env.dotnet.example .env.dotnet && \
+				   echo "\033[32mRespaldo creado y nuevo .env.dotnet generado desde .env.dotnet.example.\033[0m" ;; \
+				3|*) echo "Operación finalizada."; exit 0 ;; \
+			esac; \
+		fi; \
+
 	else \
 		echo "\033[33mCI=true: se omite setup-interactive (no hay terminal interactiva).\033[0m"; \
 	fi
