@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Infrastructure.Configuration;
+namespace uni_chat_backend.Infrastructure.Configuration;
 
 public class JwtSettings
 {

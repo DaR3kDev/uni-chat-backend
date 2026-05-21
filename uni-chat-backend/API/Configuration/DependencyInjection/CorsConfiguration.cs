@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.API.Configuration.DependencyInjection;
+namespace uni_chat_backend.API.Configuration.DependencyInjection;
 
 public static class CorsConfiguration
 {

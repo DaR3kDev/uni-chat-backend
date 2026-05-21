@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using uni_chat_backend.Features.Messages.SendMessage;
 using uni_chat_backend.Features.Messages.UploadFile;
 

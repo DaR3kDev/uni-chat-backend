@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using uni_chat_backend.Application.Common.Behaviors;
 
 namespace uni_chat_backend.Infrastructure.DependencyInjection;

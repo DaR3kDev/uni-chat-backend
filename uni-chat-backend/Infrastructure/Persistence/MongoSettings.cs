@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Infrastructure.Persistence;
+namespace uni_chat_backend.Infrastructure.Persistence;
 
 public class MongoSettings
 {

@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Infrastructure.Persistence.Collections;
+namespace uni_chat_backend.Infrastructure.Persistence.Collections;
 
 public static class MongoCollectionNames
 {

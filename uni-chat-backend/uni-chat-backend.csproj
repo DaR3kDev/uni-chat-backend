@@ -36,6 +36,13 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Remove="uni-chat-backend.Tests/**" />
+        <Content Remove="uni-chat-backend.Tests/**" />
+        <EmbeddedResource Remove="uni-chat-backend.Tests/**" />
+        <None Remove="uni-chat-backend.Tests/**" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Content Include="..\.dockerignore">
             <Link>.dockerignore</Link>
         </Content>

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using uni_chat_backend.Features.Auth.Refresh;
 
 namespace uni_chat_backend.API.Endpoints.Auth;

@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Features.Auth.Register.Interfaces;
+namespace uni_chat_backend.Features.Auth.Register.Interfaces;
 
 public interface IUserRegistrationValidator
 {

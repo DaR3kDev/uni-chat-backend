@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using FluentValidation;
 
 namespace uni_chat_backend.API.Configuration.DependencyInjection;

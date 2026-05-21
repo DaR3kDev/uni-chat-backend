@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using StackExchange.Redis;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Features.Auth.Login.Interfaces;

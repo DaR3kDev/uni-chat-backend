@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Features.Auth;
+using uni_chat_backend.Features.Auth;
 
 namespace uni_chat_backend.Infrastructure.DependencyInjection;
 

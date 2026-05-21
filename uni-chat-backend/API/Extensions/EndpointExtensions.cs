@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.API.Endpoints.Auth;
+using uni_chat_backend.API.Endpoints.Auth;
 using uni_chat_backend.API.Endpoints.Contact;
 using uni_chat_backend.API.Endpoints.Conversations;
 using uni_chat_backend.API.Endpoints.Messages;

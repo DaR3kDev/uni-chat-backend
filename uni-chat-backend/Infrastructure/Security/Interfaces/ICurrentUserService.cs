@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Infrastructure.Security.Interfaces;
+namespace uni_chat_backend.Infrastructure.Security.Interfaces;
 
 public interface ICurrentUserService
 {

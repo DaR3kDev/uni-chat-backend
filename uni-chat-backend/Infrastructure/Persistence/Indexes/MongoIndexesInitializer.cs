@@ -1,4 +1,4 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 
 namespace uni_chat_backend.Infrastructure.Persistence.Indexes;
 

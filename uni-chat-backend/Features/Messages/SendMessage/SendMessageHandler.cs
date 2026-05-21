@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using StackExchange.Redis;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Domain.Enums;

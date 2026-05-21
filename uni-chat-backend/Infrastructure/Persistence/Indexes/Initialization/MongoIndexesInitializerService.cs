@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Infrastructure.Persistence.Indexes.Initialization;
+namespace uni_chat_backend.Infrastructure.Persistence.Indexes.Initialization;
 
 public class MongoIndexesInitializerService(MongoContext context) : IHostedService
 {

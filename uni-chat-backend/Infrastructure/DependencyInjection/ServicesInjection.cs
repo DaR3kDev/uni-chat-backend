@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Infrastructure.Security;
+using uni_chat_backend.Infrastructure.Security;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
 using uni_chat_backend.Infrastructure.Services;
 

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using uni_chat_backend.Infrastructure.Services;
 
 namespace uni_chat_backend.Features.Messages.UploadFile;

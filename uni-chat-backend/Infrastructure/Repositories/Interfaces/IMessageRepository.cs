@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Domain.Entities;
+using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Domain.Enums;
 
 namespace uni_chat_backend.Infrastructure.Repositories.Interfaces;

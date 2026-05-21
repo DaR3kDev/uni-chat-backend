@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Domain.Entities;
+namespace uni_chat_backend.Domain.Entities;
 
 public class EncryptionData
 {

@@ -5,9 +5,16 @@
 .DEFAULT_GOAL := help
 
 CSPROJ     := uni-chat-backend.csproj
+SLN        := ../uni-chat-backend.slnx
+TEST_PROJ  := uni-chat-backend.Tests/uni-chat-backend.Tests.csproj
+CONFIG     := Release
 COMPOSE    := docker compose
-DOCS_DIR   := ../docs
-DOTNET     := dotnet
+DOCS_DIR      := ../docs
+BUN_VERSION_FILE := $(DOCS_DIR)/.bun-version
+BUN_VERSION   := $(shell cat $(BUN_VERSION_FILE) 2>/dev/null || echo "1.2.23")
+BUN           := $(shell command -v bun 2>/dev/null || echo "$(HOME)/.bun/bin/bun")
+# dotnet en PATH, o instalación local en ~/.dotnet (script oficial / CI del agente)
+DOTNET        := $(shell command -v dotnet 2>/dev/null || echo "$(HOME)/.dotnet/dotnet")
 IMAGE_NAME ?= ghcr.io/dar3kdev/uni-chat-backend
 IMAGE_TAG  ?= main
 
@@ -46,7 +53,8 @@ define print_header
 @echo ""
 endef
 
-.PHONY: help setup setup-interactive install restore build run watch clean clean-confirm \
+.PHONY: help setup setup-interactive install check-dotnet check-bun restore build run watch clean clean-confirm \
+        lint lint-fix test ci pre-commit install-hooks env-from-ci \
         up down down-confirm restart logs ps ports docker-build docker-up \
         docker-image docker-push docker-release \
         docs-install docs docs-build dev dev-watch menu
@@ -58,6 +66,8 @@ help: ## Muestra todos los comandos y sus descripciones en español
 	@grep -E '^[a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*## "}; {printf "  $(COLOR_CYAN)%-22s$(COLOR_RESET) %s\n", $$1, $$2}'
 	@echo ""
+	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make ci$(COLOR_RESET) antes de push (restore + lint + build + test)"
+	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make install-hooks$(COLOR_RESET) para activar pre-commit local"
 	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make install$(COLOR_RESET) para una instalación completa"
 	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make ports$(COLOR_RESET) para ver todos los puertos"
 	@echo "$(COLOR_YELLOW)💡 Tip:$(COLOR_RESET) Usa $(COLOR_CYAN)make docker-release$(COLOR_RESET) para construir y publicar la imagen"
@@ -122,15 +132,55 @@ install: ## Instalación completa con mensajes interactivos, emojis y registro d
 
 # --- .NET ---
 
-restore: ## Descarga y restaura los paquetes NuGet del proyecto
+check-dotnet:
+	@if [ ! -x "$(DOTNET)" ] && ! command -v dotnet >/dev/null 2>&1; then \
+		echo "$(COLOR_RED)❌ .NET SDK no encontrado.$(COLOR_RESET)"; \
+		echo "Instala .NET 10: https://dotnet.microsoft.com/download"; \
+		echo "O en WSL: curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 10.0"; \
+		echo "Luego añade a ~/.bashrc: export PATH=\"\$$HOME/.dotnet:\$$PATH\""; \
+		exit 1; \
+	fi
+
+restore: check-dotnet ## Descarga y restaura los paquetes NuGet (solution: API + tests)
 	@$(call print_step,"📦","Restaurando paquetes NuGet...")
-	$(DOTNET) restore $(CSPROJ)
+	$(DOTNET) restore $(SLN)
 	@$(call print_success,"Paquetes restaurados")
 
-build: ## Compila el proyecto sin ejecutarlo
-	@$(call print_step,"🏗️","Compilando proyecto...")
-	$(DOTNET) build $(CSPROJ)
+build: ## Compila la solution (API + tests) sin ejecutar
+	@$(call print_step,"🏗️","Compilando solution...")
+	$(DOTNET) build $(SLN) -c $(CONFIG)
 	@$(call print_success,"Proyecto compilado")
+
+lint: ## Verifica espacios en blanco y finales de línea (dotnet format whitespace)
+	@$(call print_step,"🔍","Verificando formato de código...")
+	$(DOTNET) format whitespace $(SLN) --verify-no-changes
+	@$(call print_success,"Formato correcto")
+
+lint-fix: ## Aplica correcciones de espacios en blanco y finales de línea
+	@$(call print_step,"✏️","Aplicando formato de código...")
+	$(DOTNET) format whitespace $(SLN)
+	@$(call print_success,"Formato aplicado")
+
+test: ## Ejecuta tests unitarios (Release)
+	@$(call print_step,"🧪","Ejecutando tests...")
+	$(DOTNET) test $(TEST_PROJ) -c $(CONFIG) --no-build --verbosity normal
+	@$(call print_success,"Tests completados")
+
+ci: restore lint build test ## Pipeline CI: restore, lint, build y test (mismo flujo que GitHub Actions)
+	@$(call print_header,"✅ CI completado","═════════════════════════════════════════")
+
+pre-commit: check-dotnet lint build test ## Hook local: lint + build + test (sin restore explícito)
+	@$(call print_success,"Pre-commit checks OK")
+
+install-hooks: ## Configura git hooks en .githooks (ejecutar una vez por clon)
+	@$(call print_step,"🪝","Instalando hooks de Git...")
+	@../scripts/install-git-hooks.sh
+	@$(call print_success,"Hooks instalados — pre-commit ejecutará make pre-commit")
+
+env-from-ci: ## Genera .env desde variables de entorno (GitHub Secrets / deploy)
+	@$(call print_step,"🔐","Generando .env desde variables de entorno...")
+	@../scripts/render-env.sh
+	@$(call print_success,"Archivo .env generado")
 
 run: ## Ejecuta la API (http://localhost:5012 en perfil http)
 	@$(call print_step,"🚀","Iniciando API en http://localhost:5012...")
@@ -142,7 +192,7 @@ watch: ## Ejecuta la API con recarga automática al guardar cambios
 
 clean: ## Elimina artefactos de compilación (sin confirmación; apto para CI)
 	@$(call print_step,"🧹","Limpiando artefactos de compilación...")
-	$(DOTNET) clean $(CSPROJ)
+	$(DOTNET) clean $(SLN)
 	@$(call print_success,"Limpieza completada")
 
 clean-confirm: ## Pide confirmación en español antes de limpiar artefactos
@@ -179,7 +229,7 @@ restart: down up ## Reinicia todos los contenedores (down + up)
 	@$(call print_step,"🔄","Reiniciando contenedores...")
 
 logs: ## Muestra los logs en tiempo real de todos los servicios
-	@$(call print_step,"📋","Mostrando logs (Ctrl+C para salir)...")
+	@$(call print_step,"📋","Mostrando logs — Ctrl+C para salir...")
 	$(COMPOSE) logs -f
 
 ps: ## Lista el estado actual de los contenedores
@@ -250,18 +300,31 @@ docker-release: docker-image docker-push ## Construye y publica la imagen en un 
 
 # --- Documentación (Docusaurus) ---
 
-docs-install: ## Instala las dependencias de la documentación con Bun
-	@$(call print_step,"📚","Instalando dependencias de documentación...")
-	cd $(DOCS_DIR) && bun install
+check-bun:
+	@if [ ! -x "$(BUN)" ] && ! command -v bun >/dev/null 2>&1; then \
+		echo "$(COLOR_RED)❌ Bun no encontrado (versión requerida: $(BUN_VERSION)).$(COLOR_RESET)"; \
+		echo "Instala: curl -fsSL https://bun.sh/install | bash -s \"bun-v$(BUN_VERSION)\""; \
+		echo "Versión del proyecto: $(BUN_VERSION_FILE)"; \
+		exit 1; \
+	fi
+	@installed="$$($(BUN) --version 2>/dev/null | tr -d '\n')"; \
+	if [ -n "$$installed" ] && [ "$$installed" != "$(BUN_VERSION)" ]; then \
+		echo "$(COLOR_YELLOW)⚠️  Bun $$installed detectado; el proyecto usa $(BUN_VERSION).$(COLOR_RESET)"; \
+		echo "Actualiza: $(BUN) upgrade --version $(BUN_VERSION)"; \
+	fi
+
+docs-install: check-bun ## Instala dependencias de docs con Bun $(BUN_VERSION)
+	@$(call print_step,"📚","Instalando dependencias de documentación — Bun $(BUN_VERSION)...")
+	cd $(DOCS_DIR) && $(BUN) install
 	@$(call print_success,"Dependencias instaladas")
 
-docs: ## Inicia el servidor de desarrollo de la documentación
+docs: check-bun ## Inicia el servidor de desarrollo de la documentación
 	@$(call print_step,"📖","Iniciando servidor de documentación...")
-	cd $(DOCS_DIR) && bun run start
+	cd $(DOCS_DIR) && $(BUN) run start
 
-docs-build: ## Genera el build estático de la documentación
+docs-build: check-bun ## Genera el build estático de la documentación
 	@$(call print_step,"📦","Generando build de documentación...")
-	cd $(DOCS_DIR) && bun run build
+	cd $(DOCS_DIR) && $(BUN) run build
 	@$(call print_success,"Build generado")
 
 # --- Atajos ---

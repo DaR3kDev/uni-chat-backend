@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using uni_chat_backend.Infrastructure.SignalR;
 
 namespace uni_chat_backend.Features.Messages.SendMessage;

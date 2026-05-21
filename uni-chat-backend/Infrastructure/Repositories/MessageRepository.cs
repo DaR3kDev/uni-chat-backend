@@ -1,4 +1,4 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Infrastructure.Persistence.Collections;

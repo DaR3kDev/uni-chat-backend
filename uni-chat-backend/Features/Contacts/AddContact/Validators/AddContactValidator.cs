@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace uni_chat_backend.Features.Contacts.AddContact.Validators;
 

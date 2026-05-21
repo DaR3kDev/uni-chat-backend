@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using uni_chat_backend.Features.Contacts.GetContacts;
 
 namespace uni_chat_backend.API.Endpoints.Contact;

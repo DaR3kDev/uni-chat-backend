@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using uni_chat_backend.Application.Common.Exceptions;
 
 namespace uni_chat_backend.Infrastructure.SignalR;

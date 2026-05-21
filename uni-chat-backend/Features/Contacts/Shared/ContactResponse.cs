@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Features.Contacts.GetContacts;
+namespace uni_chat_backend.Features.Contacts.GetContacts;
 
 public record ContactResponse(
     Guid Id,

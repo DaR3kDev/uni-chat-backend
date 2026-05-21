@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using uni_chat_backend.Features.Auth.Register.Services;
 using uni_chat_backend.Features.Auth.Shared;
 

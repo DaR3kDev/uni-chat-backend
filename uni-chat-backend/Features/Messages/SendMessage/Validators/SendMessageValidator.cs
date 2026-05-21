@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using uni_chat_backend.Domain.Enums;
 
 namespace uni_chat_backend.Features.Messages.SendMessage.Validators;

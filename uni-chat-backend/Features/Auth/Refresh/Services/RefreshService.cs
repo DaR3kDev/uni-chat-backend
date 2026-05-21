@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Application.Common.Exceptions;
+using uni_chat_backend.Application.Common.Exceptions;
 using uni_chat_backend.Features.Auth.Refresh.Interfaces;
 using uni_chat_backend.Features.Auth.Shared;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;

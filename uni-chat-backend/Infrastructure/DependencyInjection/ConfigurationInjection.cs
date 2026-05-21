@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using uni_chat_backend.Infrastructure.Configuration;
 using uni_chat_backend.Infrastructure.Persistence;
 

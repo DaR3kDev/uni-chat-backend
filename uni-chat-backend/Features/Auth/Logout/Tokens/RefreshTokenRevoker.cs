@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Features.Auth.Logout.Interfaces;
+using uni_chat_backend.Features.Auth.Logout.Interfaces;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 
 namespace uni_chat_backend.Features.Auth.Logout.Tokens;

@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
 
 namespace uni_chat_backend.Infrastructure.Security;

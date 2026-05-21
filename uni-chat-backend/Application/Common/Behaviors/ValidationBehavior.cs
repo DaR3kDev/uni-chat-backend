@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MediatR;
 using uni_chat_backend.Application.Common.Exceptions;
 

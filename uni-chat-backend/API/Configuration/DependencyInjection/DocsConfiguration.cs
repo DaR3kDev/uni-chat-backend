@@ -1,4 +1,4 @@
-﻿using Scalar.AspNetCore;
+using Scalar.AspNetCore;
 
 namespace uni_chat_backend.API.Configuration.DependencyInjection;
 

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using uni_chat_backend.API.Responses;
 using uni_chat_backend.Application.Common.Exceptions;

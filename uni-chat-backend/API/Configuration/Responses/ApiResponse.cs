@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.API.Responses;
+namespace uni_chat_backend.API.Responses;
 
 public class ApiResponse
 {

@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Domain.Entities;
+using uni_chat_backend.Domain.Entities;
 using uni_chat_backend.Features.Auth.Register.Interfaces;
 using uni_chat_backend.Features.Auth.Shared;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;

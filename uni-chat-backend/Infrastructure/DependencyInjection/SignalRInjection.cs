@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Infrastructure.DependencyInjection;
+namespace uni_chat_backend.Infrastructure.DependencyInjection;
 
 public static class SignalRInjection
 {

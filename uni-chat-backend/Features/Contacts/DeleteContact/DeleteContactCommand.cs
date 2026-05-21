@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 
 namespace uni_chat_backend.Features.Contacts.DeleteContact;
 

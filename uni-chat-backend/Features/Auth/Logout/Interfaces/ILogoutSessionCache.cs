@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Features.Auth.Logout.Interfaces;
+namespace uni_chat_backend.Features.Auth.Logout.Interfaces;
 
 public interface ILogoutSessionCache
 {
