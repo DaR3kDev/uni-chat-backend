@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Infrastructure.Settings;
+namespace uni_chat_backend.Infrastructure.Settings;
 
 public class RedisSettings
 {
