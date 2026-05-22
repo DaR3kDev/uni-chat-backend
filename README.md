@@ -38,7 +38,7 @@ Desde la carpeta del proyecto .NET (`uni-chat-backend/uni-chat-backend/`):
 cp .env.ci.example .env
 
 # 2. Configuración de Cloudinary (opcional)
-cp appsettings.Development.example.json appsettings.Development.json
+cp appsettings.ci.Development.example.json appsettings.Development.json
 # Edita appsettings.Development.json (localhost) y Cloudinary en .env si lo necesitas
 
 # 3. Generar configuración de ASP.NET (OBLIGATORIO)
