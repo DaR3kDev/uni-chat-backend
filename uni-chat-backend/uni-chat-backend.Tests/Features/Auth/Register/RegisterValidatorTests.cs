@@ -8,8 +8,10 @@ public class RegisterValidatorTests
 {
     private readonly RegisterValidator _validator = new();
 
-    private static RegisterCommand ValidCommand() =>
-        new("usuario", "+573001234567", "test@example.com");
+    private static RegisterCommand ValidCommand()
+    {
+        return new RegisterCommand("usuario", "+573001234567", "test@example.com");
+    }
 
     [Fact]
     public void Should_pass_when_all_fields_are_valid()

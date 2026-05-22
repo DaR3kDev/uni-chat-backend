@@ -10,7 +10,7 @@ public static class ConfigurationInjection
     public static void AddConfigurations(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<MongoSettings>(configuration.GetSection("Mongo"));
-        services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
+        services.Configure<RabbitMqSettings>(configuration.GetSection("RabbitMQ"));
         services.Configure<RedisSettings>(configuration.GetSection("Redis"));
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<RefreshTokenSettings>(configuration.GetSection("RefreshToken"));

@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="CloudinaryDotNet" Version="1.29.1"/>
-        <PackageReference Include="DotNetEnv" Version="3.2.0" />
+        <PackageReference Include="DotNetEnv" Version="3.2.0"/>
         <PackageReference Include="FluentValidation" Version="12.1.1"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
         <PackageReference Include="Mapster" Version="10.0.7"/>
@@ -37,10 +37,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="uni-chat-backend.Tests/**" />
-        <Content Remove="uni-chat-backend.Tests/**" />
-        <EmbeddedResource Remove="uni-chat-backend.Tests/**" />
-        <None Remove="uni-chat-backend.Tests/**" />
+        <Compile Remove="uni-chat-backend.Tests/**"/>
+        <Content Remove="uni-chat-backend.Tests/**"/>
+        <EmbeddedResource Remove="uni-chat-backend.Tests/**"/>
+        <None Remove="uni-chat-backend.Tests/**"/>
     </ItemGroup>
 
     <ItemGroup>

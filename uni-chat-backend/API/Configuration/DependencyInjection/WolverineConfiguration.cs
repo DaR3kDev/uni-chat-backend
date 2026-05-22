@@ -11,7 +11,7 @@ public static class WolverineConfiguration
     {
         var rabbitSettings = configuration
             .GetSection("RabbitMQ")
-            .Get<RabbitMQSettings>();
+            .Get<RabbitMqSettings>();
 
         if (rabbitSettings is null ||
             string.IsNullOrWhiteSpace(rabbitSettings.ConnectionString))
