@@ -6,7 +6,7 @@ public static class DocsConfiguration
 {
     public static void UseApiDocs(this WebApplication app)
     {
-         var enableDocs =
+        var enableDocs =
             app.Environment.IsDevelopment() ||
             Environment.GetEnvironmentVariable("ENABLE_DOCS") == "true";
 
