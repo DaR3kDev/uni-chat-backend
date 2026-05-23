@@ -6,7 +6,8 @@ public static class CorsConfiguration
     [
         "http://localhost:5173",
         "http://localhost:3000",
-        "http://localhost:8080"
+        "http://localhost:8080",
+        "https://cartridges-done-nose-soap.trycloudflare.com"
     ];
 
     public static void AddCorsConfiguration(this IServiceCollection services)
