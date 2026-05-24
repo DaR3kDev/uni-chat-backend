@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace uni_chat_backend.API.Configuration.DependencyInjection;
+namespace uni_chat_backend.API.Configuration.Middleware;
 
 public static class MediatorConfiguration
 {

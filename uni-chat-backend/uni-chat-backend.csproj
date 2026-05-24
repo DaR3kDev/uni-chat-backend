@@ -49,4 +49,15 @@
         </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="publish\web.config" />
+      <_ContentIncludedByDefault Remove="publish\appsettings.ci.Development.example.json" />
+      <_ContentIncludedByDefault Remove="publish\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="publish\appsettings.json" />
+      <_ContentIncludedByDefault Remove="publish\dotnet-tools.json" />
+      <_ContentIncludedByDefault Remove="publish\uni-chat-backend.deps.json" />
+      <_ContentIncludedByDefault Remove="publish\uni-chat-backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="publish\uni-chat-backend.staticwebassets.endpoints.json" />
+    </ItemGroup>
+
 </Project>

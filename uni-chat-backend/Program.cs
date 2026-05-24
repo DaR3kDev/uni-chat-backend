@@ -2,6 +2,8 @@ using DotNetEnv;
 using Serilog;
 using Serilog.Exceptions;
 using uni_chat_backend.API.Configuration.DependencyInjection;
+using uni_chat_backend.API.Configuration.Middleware;
+
 using uni_chat_backend.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);

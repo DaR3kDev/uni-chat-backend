@@ -1,3 +1,4 @@
+using uni_chat_backend.API.Configuration.Middleware;
 using uni_chat_backend.API.Extensions;
 using uni_chat_backend.API.Middleware;
 
@@ -18,7 +19,7 @@ public static class MiddlewareConfiguration
 
         app.UseMiddleware<RequestIdMiddleware>();
 
-        app.MapEndpoints();
+        app.MapApiEndpoints();
 
         app.UseCustomMiddlewares();
     }
