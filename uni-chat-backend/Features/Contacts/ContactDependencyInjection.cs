@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Features.Contacts.AddContact;
+using uni_chat_backend.Features.Contacts.AddContact;
 using uni_chat_backend.Features.Contacts.DeleteContact;
 using uni_chat_backend.Features.Contacts.GetContacts;
 

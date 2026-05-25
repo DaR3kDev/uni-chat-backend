@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Features.Contacts.Shared;
+using uni_chat_backend.Features.Contacts.Shared;
 
 namespace uni_chat_backend.Features.Contacts.GetContacts.Interfaces;
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using uni_chat_backend.Features.Contacts.GetContacts.Cache;
 using uni_chat_backend.Features.Contacts.GetContacts.Interfaces;
 

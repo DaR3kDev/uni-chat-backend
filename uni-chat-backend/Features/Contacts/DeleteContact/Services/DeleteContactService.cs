@@ -1,4 +1,4 @@
-﻿using uni_chat_backend.Application.Common.Exceptions;
+using uni_chat_backend.Application.Common.Exceptions;
 using uni_chat_backend.Features.Contacts.DeleteContact.Interfaces;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security.Interfaces;

@@ -1,4 +1,4 @@
-﻿using StackExchange.Redis;
+using StackExchange.Redis;
 using uni_chat_backend.Features.Contacts.DeleteContact.Interfaces;
 
 namespace uni_chat_backend.Features.Contacts.DeleteContact.Cache;

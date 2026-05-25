@@ -1,4 +1,4 @@
-﻿namespace uni_chat_backend.Features.Contacts.AddContact.Interfaces;
+namespace uni_chat_backend.Features.Contacts.AddContact.Interfaces;
 
 public interface IAddContactService
 {

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using uni_chat_backend.Features.Contacts.AddContact.Cache;
 using uni_chat_backend.Features.Contacts.AddContact.Interfaces;
 using uni_chat_backend.Features.Contacts.AddContact.Services;
