@@ -12,19 +12,16 @@ public class RegisterService(
     TokenService tokenService,
     IUserRegistrationValidator validator,
     IUserSessionCache sessionCache,
-    IHttpContextAccessor httpContextAccessor,
     ILogger<RegisterService> logger)
 {
     public async Task<AuthResponse> RegisterAsync(RegisterCommand request, CancellationToken ct)
     {
-        var requestId = httpContextAccessor.HttpContext?.Items["RequestId"]?.ToString() ?? "desconocido";
-
-        logger.LogInformation("[{RequestId}] Iniciando proceso de registro de usuario", requestId);
+        logger.LogInformation("Iniciando proceso de registro de usuario");
 
         var email = request.Email.Trim().ToLowerInvariant();
         var username = request.Username.Trim().ToLowerInvariant();
 
-        logger.LogInformation("[{RequestId}] Validando disponibilidad del correo y nombre de usuario", requestId);
+        logger.LogInformation("Validando disponibilidad del correo y nombre de usuario");
 
         await validator.ValidateAsync(email, username);
 
@@ -38,24 +35,25 @@ public class RegisterService(
             CreatedAt = DateTime.UtcNow
         };
 
-        logger.LogInformation("[{RequestId}] Creando usuario con ID: {UserId}", requestId, user.Id);
+        logger.LogInformation("Creando usuario con ID: {UserId}", user.Id);
 
         await userRepository.CreateAsync(user);
 
-        logger.LogInformation("[{RequestId}] Generando tokens de autenticación", requestId);
+        logger.LogInformation("Generando tokens de autenticación");
 
         var accessToken = tokenService.GenerateAccessToken(user);
+
         var refreshToken = tokenService.GenerateRefreshToken(user.Id);
 
         await refreshTokenRepository.CreateAsync(refreshToken);
 
-        logger.LogInformation("[{RequestId}] Creando sesión del usuario y marcando estado en línea", requestId);
+        logger.LogInformation("Creando sesión del usuario y marcando estado en línea");
 
         await sessionCache.CreateSessionAsync(user);
+
         await sessionCache.MarkOnlineAsync(user.Id);
 
-        logger.LogInformation("[{RequestId}] Registro completado correctamente para el usuario: {UserId}", requestId,
-            user.Id);
+        logger.LogInformation("Registro completado correctamente para el usuario: {UserId}", user.Id);
 
         return new AuthResponse { AccessToken = accessToken, RefreshToken = refreshToken.Token };
     }

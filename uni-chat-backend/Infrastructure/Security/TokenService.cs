@@ -10,17 +10,11 @@ namespace uni_chat_backend.Infrastructure.Security;
 
 public class TokenService(JwtSettings jwt, RefreshTokenSettings refresh)
 {
-    private readonly JwtSettings _jwt = jwt;
-    private readonly RefreshTokenSettings _refresh = refresh;
-
     public string GenerateAccessToken(User user)
     {
-        var keyString = _jwt.Key
-                        ?? throw new Exception("JWT Key no configurada");
+        var keyString = jwt.Key ?? throw new Exception("JWT Key no configurada");
 
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(keyString)
-        );
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
 
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -32,13 +26,8 @@ public class TokenService(JwtSettings jwt, RefreshTokenSettings refresh)
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var token = new JwtSecurityToken(
-            _jwt.Issuer,
-            _jwt.Audience,
-            claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwt.ExpireMinutes),
-            signingCredentials: creds
-        );
+        var token = new JwtSecurityToken(jwt.Issuer, jwt.Audience, claims,
+            expires: DateTime.UtcNow.AddMinutes(jwt.ExpireMinutes), signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -52,7 +41,7 @@ public class TokenService(JwtSettings jwt, RefreshTokenSettings refresh)
             Id = Guid.NewGuid(),
             Token = Convert.ToBase64String(randomBytes),
             UserId = userId,
-            ExpiresAt = DateTime.UtcNow.AddDays(_refresh.ExpireDays),
+            ExpiresAt = DateTime.UtcNow.AddDays(refresh.ExpireDays),
             IsRevoked = false
         };
     }

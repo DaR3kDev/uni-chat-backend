@@ -1,6 +1,6 @@
-﻿namespace uni_chat_backend.Features.Contacts.DeleteContact.Cache;
+﻿namespace uni_chat_backend.Features.Contacts.DeleteContact.Interfaces;
 
-public class IDeleteContactCache
+public interface IDeleteContactCache
 {
-    
+    Task IncrementContactsVersionAsync(Guid userId);
 }

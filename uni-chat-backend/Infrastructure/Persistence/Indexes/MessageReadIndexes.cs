@@ -9,12 +9,8 @@ public static class MessageReadIndexes
     {
         var collection = db.GetCollection<MessageRead>("message_read");
 
-        await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<MessageRead>(
-                Builders<MessageRead>.IndexKeys
-                    .Ascending(x => x.MessageId)
-                    .Ascending(x => x.UserId)
-            )
-        );
+        await collection.Indexes.CreateOneAsync(new CreateIndexModel<MessageRead>(Builders<MessageRead>.IndexKeys
+            .Ascending(x => x.MessageId)
+            .Ascending(x => x.UserId)));
     }
 }

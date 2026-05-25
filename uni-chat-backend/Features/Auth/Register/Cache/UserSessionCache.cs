@@ -20,19 +20,11 @@ public class UserSessionCache(IConnectionMultiplexer redis) : IUserSessionCache
             LoggedAt = DateTime.UtcNow
         };
 
-        await _db.StringSetAsync(
-            $"session:{user.Id}",
-            JsonSerializer.Serialize(session),
-            TimeSpan.FromHours(1)
-        );
+        await _db.StringSetAsync($"session:{user.Id}", JsonSerializer.Serialize(session), TimeSpan.FromHours(1));
     }
 
     public async Task MarkOnlineAsync(Guid userId)
     {
-        await _db.StringSetAsync(
-            $"user:{userId}:online",
-            "true",
-            TimeSpan.FromMinutes(30)
-        );
+        await _db.StringSetAsync($"user:{userId}:online", "true", TimeSpan.FromMinutes(30));
     }
 }

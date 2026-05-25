@@ -10,17 +10,9 @@ public static class ConversationsIndexes
         var collection = db.GetCollection<Conversation>("conversations");
 
         await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<Conversation>(
-                Builders<Conversation>.IndexKeys
-                    .Descending(x => x.LastMessageAt)
-            )
-        );
+            new CreateIndexModel<Conversation>(Builders<Conversation>.IndexKeys.Descending(x => x.LastMessageAt)));
 
         await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<Conversation>(
-                Builders<Conversation>.IndexKeys
-                    .Ascending("Participants.UserId")
-            )
-        );
+            new CreateIndexModel<Conversation>(Builders<Conversation>.IndexKeys.Ascending("Participants.UserId")));
     }
 }

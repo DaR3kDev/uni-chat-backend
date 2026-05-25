@@ -7,13 +7,11 @@ namespace uni_chat_backend.API.Middleware;
 
 public class ExceptionMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next = next;
-
     public async Task Invoke(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (AppException ex)
         {
@@ -30,17 +28,10 @@ public class ExceptionMiddleware(RequestDelegate next)
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = status;
 
-        var response = new ApiResponse
-        {
-            StatusCode = status,
-            Message = ex.Message
-        };
+        var response = new ApiResponse { StatusCode = status, Message = ex.Message };
 
-        if (ex is BadRequestException br && br.Errors is not null)
-            response.Errors = br.Errors;
+        if (ex is BadRequestException { Errors: not null } br) response.Errors = br.Errors;
 
-        await context.Response.WriteAsync(
-            JsonSerializer.Serialize(response)
-        );
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
 }

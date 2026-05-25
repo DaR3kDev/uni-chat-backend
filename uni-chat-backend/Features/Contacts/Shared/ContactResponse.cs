@@ -1,6 +1,6 @@
-namespace uni_chat_backend.Features.Contacts.GetContacts;
+namespace uni_chat_backend.Features.Contacts.Shared;
 
-public record ContactResponse(
+public sealed record ContactResponse(
     Guid Id,
     Guid ContactUserId,
     string? Username,

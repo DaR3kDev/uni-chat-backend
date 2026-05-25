@@ -16,7 +16,14 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithMachineName()
     .Enrich.WithExceptionDetails()
     .Enrich.WithThreadId()
-    .WriteTo.Console()
+    .WriteTo.Console(
+        outputTemplate:
+        "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level:u3}] " +
+        "[RequestId: {RequestId}] " +
+        "[Machine: {MachineName}] " +
+        "[Thread: {ThreadId}] " +
+        "{Message:lj}{NewLine}{Exception}"
+    )
     .WriteTo.Seq("http://seq:80")
     .CreateLogger();
 

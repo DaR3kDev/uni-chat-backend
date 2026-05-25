@@ -6,7 +6,7 @@ namespace uni_chat_backend.Features.Auth.Me;
 
 public static class MeDependencyInjection
 {
-    public static IServiceCollection AddMeFeature(this IServiceCollection services)
+    public static void AddMeFeature(this IServiceCollection services)
     {
         // =========================================================
         // SERVICES
@@ -17,7 +17,5 @@ public static class MeDependencyInjection
         // CACHE
         // =========================================================
         services.AddScoped<IMeUserCache, MeUserCache>();
-
-        return services;
     }
 }

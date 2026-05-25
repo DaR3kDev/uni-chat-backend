@@ -2,5 +2,5 @@
 
 public interface IContactCache
 {
-    
+    Task IncrementContactsVersionAsync(Guid userId);
 }

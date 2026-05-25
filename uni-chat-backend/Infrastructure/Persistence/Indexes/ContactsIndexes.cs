@@ -9,20 +9,11 @@ public static class ContactsIndexes
     {
         var collection = db.GetCollection<Contact>("contacts");
 
-        await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<Contact>(
-                Builders<Contact>.IndexKeys
-                    .Ascending(x => x.OwnerUserId)
-                    .Ascending(x => x.ContactUserId),
-                new CreateIndexOptions { Unique = true }
-            )
-        );
+        await collection.Indexes.CreateOneAsync(new CreateIndexModel<Contact>(
+            Builders<Contact>.IndexKeys.Ascending(x => x.OwnerUserId).Ascending(x => x.ContactUserId),
+            new CreateIndexOptions { Unique = true }));
 
         await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<Contact>(
-                Builders<Contact>.IndexKeys
-                    .Ascending(x => x.OwnerUserId)
-            )
-        );
+            new CreateIndexModel<Contact>(Builders<Contact>.IndexKeys.Ascending(x => x.OwnerUserId)));
     }
 }

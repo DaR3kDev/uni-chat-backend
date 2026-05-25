@@ -9,17 +9,10 @@ public static class RefreshTokensIndexes
     {
         var collection = db.GetCollection<RefreshToken>("refresh_tokens");
 
-        await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<RefreshToken>(
-                Builders<RefreshToken>.IndexKeys.Ascending(x => x.Token),
-                new CreateIndexOptions { Unique = true }
-            )
-        );
+        await collection.Indexes.CreateOneAsync(new CreateIndexModel<RefreshToken>(
+            Builders<RefreshToken>.IndexKeys.Ascending(x => x.Token), new CreateIndexOptions { Unique = true }));
 
         await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<RefreshToken>(
-                Builders<RefreshToken>.IndexKeys.Ascending(x => x.UserId)
-            )
-        );
+            new CreateIndexModel<RefreshToken>(Builders<RefreshToken>.IndexKeys.Ascending(x => x.UserId)));
     }
 }

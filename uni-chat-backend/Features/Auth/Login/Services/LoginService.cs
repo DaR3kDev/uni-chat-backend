@@ -10,41 +10,37 @@ public class LoginService(
     TokenService tokenService,
     IUserLoginValidator validator,
     IUserLoginSessionCache sessionCache,
-    IHttpContextAccessor httpContextAccessor,
     ILogger<LoginService> logger)
 {
     public async Task<AuthResponse> LoginAsync(LoginCommand request, CancellationToken cancellationToken)
     {
-        var requestId = httpContextAccessor.HttpContext?.Items["RequestId"]?.ToString() ?? "desconocido";
+        logger.LogInformation("Iniciando proceso de inicio de sesión");
 
-        logger.LogInformation("[{RequestId}] Iniciando proceso de inicio de sesión", requestId);
-
-        logger.LogInformation("[{RequestId}] Validando credenciales del usuario", requestId);
+        logger.LogInformation("Validando credenciales del usuario");
 
         var user = await validator.ValidateAsync(request.Phone);
 
-        logger.LogInformation("[{RequestId}] Usuario autenticado correctamente con ID: {UserId}", requestId, user.Id);
+        logger.LogInformation("Usuario autenticado correctamente con ID: {UserId}", user.Id);
 
-        logger.LogInformation("[{RequestId}] Generando tokens de autenticación", requestId);
+        logger.LogInformation("Generando tokens de autenticación");
 
         var accessToken = tokenService.GenerateAccessToken(user);
 
         var refreshToken = tokenService.GenerateRefreshToken(user.Id);
 
-        logger.LogInformation("[{RequestId}] Revocando sesiones y tokens anteriores", requestId);
+        logger.LogInformation("Revocando sesiones y tokens anteriores");
 
         await refreshTokenRepository.RevokeAsync(user.Id, refreshToken.Token);
 
-        logger.LogInformation("[{RequestId}] Creando sesión del usuario", requestId);
+        logger.LogInformation("Creando sesión del usuario");
 
         await sessionCache.CreateSessionAsync(user);
 
         await sessionCache.MarkOnlineAsync(user.Id);
 
-        logger.LogInformation("[{RequestId}] Usuario marcado como conectado", requestId);
+        logger.LogInformation("Usuario marcado como conectado");
 
-        logger.LogInformation("[{RequestId}] Inicio de sesión completado correctamente para el usuario: {UserId}",
-            requestId, user.Id);
+        logger.LogInformation("Inicio de sesión completado correctamente para el usuario: {UserId}", user.Id);
 
         return new AuthResponse { AccessToken = accessToken, RefreshToken = refreshToken.Token };
     }

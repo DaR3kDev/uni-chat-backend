@@ -11,12 +11,11 @@ public class CloudinaryService
 
     public CloudinaryService(IOptions<CloudinarySettings> options)
     {
-        var settings = options.Value
-                       ?? throw new ArgumentNullException(nameof(options),
+        var settings = options.Value ??
+                       throw new ArgumentNullException(nameof(options),
                            "La configuración de Cloudinary no se encontró.");
 
-        if (string.IsNullOrWhiteSpace(settings.CloudName) ||
-            string.IsNullOrWhiteSpace(settings.ApiKey) ||
+        if (string.IsNullOrWhiteSpace(settings.CloudName) || string.IsNullOrWhiteSpace(settings.ApiKey) ||
             string.IsNullOrWhiteSpace(settings.ApiSecret))
             throw new ArgumentException(
                 "La configuración de Cloudinary es inválida. Verifica CloudName, ApiKey y ApiSecret.");
@@ -72,7 +71,6 @@ public class CloudinaryService
 
     private static void ValidateFile(IFormFile file)
     {
-        if (file == null || file.Length == 0)
-            throw new ArgumentException("Archivo inválido o vacío.", nameof(file));
+        if (file == null || file.Length == 0) throw new ArgumentException("Archivo inválido o vacío.", nameof(file));
     }
 }

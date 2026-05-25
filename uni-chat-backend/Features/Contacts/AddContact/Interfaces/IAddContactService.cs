@@ -2,5 +2,5 @@
 
 public interface IAddContactService
 {
-    
+    Task<string> AddAsync(AddContactCommand request, CancellationToken cancellationToken);
 }

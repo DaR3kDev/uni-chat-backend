@@ -10,38 +10,34 @@ public class MeService(
     IUserRepository userRepository,
     ICurrentUserService currentUserService,
     IMeUserCache userCache,
-    ILogger<MeService> logger,
-    IHttpContextAccessor httpContextAccessor)
+    ILogger<MeService> logger)
 {
-    public async Task<User> GetCurrentUserAsync(CancellationToken cancellationToken)
+    public async Task<User> GetCurrentUserAsync()
     {
-        var requestId = httpContextAccessor.HttpContext?.Items["RequestId"]?.ToString() ?? "desconocido";
-
-        logger.LogInformation("[{RequestId}] Iniciando obtención del usuario autenticado", requestId);
+        logger.LogInformation("Iniciando obtención del usuario autenticado");
 
         var userId = currentUserService.UserId ?? throw new UnauthorizedException("Usuario no autenticado");
 
-        logger.LogInformation("[{RequestId}] Buscando usuario en caché: {UserId}", requestId, userId);
+        logger.LogInformation("Buscando usuario en caché: {UserId}", userId);
 
         var cachedUser = await userCache.GetAsync(userId);
 
         if (cachedUser is not null)
         {
-            logger.LogInformation("[{RequestId}] Usuario obtenido desde caché: {UserId}", requestId, userId);
+            logger.LogInformation("Usuario obtenido desde caché: {UserId}", userId);
 
             return cachedUser;
         }
 
-        logger.LogInformation("[{RequestId}] Usuario no encontrado en caché, consultando base de datos: {UserId}",
-            requestId, userId);
+        logger.LogInformation("Usuario no encontrado en caché, consultando base de datos: {UserId}", userId);
 
         var user = await userRepository.GetByIdAsync(userId) ?? throw new NotFoundException("Usuario no encontrado");
 
-        logger.LogInformation("[{RequestId}] Guardando usuario en caché: {UserId}", requestId, userId);
+        logger.LogInformation("Guardando usuario en caché: {UserId}", userId);
 
         await userCache.SetAsync(user);
 
-        logger.LogInformation("[{RequestId}] Usuario obtenido correctamente: {UserId}", requestId, userId);
+        logger.LogInformation("Usuario obtenido correctamente: {UserId}", userId);
 
         return user;
     }

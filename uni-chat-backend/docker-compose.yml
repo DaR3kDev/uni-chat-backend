@@ -17,20 +17,22 @@
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ENABLE_DOCS: ${ENABLE_DOCS}
+
       Mongo__ConnectionString: ${MONGO_CONNECTION_STRING}
       Mongo__Database: ${MONGO_DATABASE}
+
       Redis__ConnectionString: ${REDIS_CONNECTION_STRING}
+
       RabbitMQ__ConnectionString: ${RABBITMQ_CONNECTION_STRING}
+
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
       Jwt__ExpireMinutes: ${JWT_EXPIRE_MINUTES}
+
       Cloudinary__CloudName: ${CLOUDINARY_CLOUD_NAME}
       Cloudinary__ApiKey: ${CLOUDINARY_API_KEY}
       Cloudinary__ApiSecret: ${CLOUDINARY_API_SECRET}
-      ASPNETCORE__ENVIRONMENT: Production
-      ENABLE__DOCS: ${ENABLE_DOCS}
-
 
     depends_on:
       mongodb:
@@ -64,7 +66,7 @@
       - mongo-data:/data/db
 
     healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -103,7 +105,7 @@
       - rabbitmq-data:/var/lib/rabbitmq
 
     healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

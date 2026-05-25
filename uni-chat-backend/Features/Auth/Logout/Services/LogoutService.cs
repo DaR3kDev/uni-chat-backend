@@ -14,36 +14,34 @@ public class LogoutService(
 
         ArgumentNullException.ThrowIfNull(httpContext);
 
-        var requestId = httpContext.Items["RequestId"]?.ToString() ?? "desconocido";
-
-        logger.LogInformation("[{RequestId}] Iniciando proceso de cierre de sesión", requestId);
+        logger.LogInformation("Iniciando proceso de cierre de sesión");
 
         var refreshToken = httpContext.Request.Cookies["refreshToken"];
 
         if (!string.IsNullOrWhiteSpace(refreshToken))
         {
-            logger.LogInformation("[{RequestId}] Revocando refresh token del usuario", requestId);
+            logger.LogInformation("Revocando refresh token del usuario");
 
             await refreshTokenRevoker.RevokeAsync(refreshToken);
         }
 
-        var userId = httpContext.User?.FindFirst("sub")?.Value;
+        var userId = httpContext.User.FindFirst("sub")?.Value;
 
         if (!string.IsNullOrWhiteSpace(userId))
         {
-            logger.LogInformation("[{RequestId}] Eliminando sesión del usuario: {UserId}", requestId, userId);
+            logger.LogInformation("Eliminando sesión del usuario: {UserId}", userId);
 
             await sessionCache.RemoveSessionAsync(userId);
 
             await sessionCache.SetOfflineAsync(userId);
 
-            logger.LogInformation("[{RequestId}] Usuario marcado como desconectado: {UserId}", requestId, userId);
+            logger.LogInformation("Usuario marcado como desconectado: {UserId}", userId);
         }
 
         httpContext.Response.Cookies.Delete("refreshToken");
 
-        logger.LogInformation("[{RequestId}] Cookie de refresh token eliminada correctamente", requestId);
+        logger.LogInformation("Cookie de refresh token eliminada correctamente");
 
-        logger.LogInformation("[{RequestId}] Cierre de sesión completado correctamente", requestId);
+        logger.LogInformation("Cierre de sesión completado correctamente");
     }
 }

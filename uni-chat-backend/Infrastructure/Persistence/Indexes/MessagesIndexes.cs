@@ -9,20 +9,13 @@ public static class MessagesIndexes
     {
         var collection = db.GetCollection<Message>("messages");
 
-        // chat por conversación 
-        await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<Message>(
-                Builders<Message>.IndexKeys
-                    .Ascending(x => x.ConversationId)
-                    .Descending(x => x.CreatedAt)
-            )
-        );
+        // chat por conversación
+        await collection.Indexes.CreateOneAsync(new CreateIndexModel<Message>(Builders<Message>.IndexKeys
+            .Ascending(x => x.ConversationId)
+            .Descending(x => x.CreatedAt)));
 
         // mensajes por usuario
         await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<Message>(
-                Builders<Message>.IndexKeys.Ascending(x => x.SenderId)
-            )
-        );
+            new CreateIndexModel<Message>(Builders<Message>.IndexKeys.Ascending(x => x.SenderId)));
     }
 }

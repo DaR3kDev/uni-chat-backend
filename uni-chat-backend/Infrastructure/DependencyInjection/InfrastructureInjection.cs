@@ -1,4 +1,5 @@
 using uni_chat_backend.Features.Auth;
+using uni_chat_backend.Features.Contacts;
 
 namespace uni_chat_backend.Infrastructure.DependencyInjection;
 
@@ -22,5 +23,6 @@ public static class InfrastructureInjection
         // FEATURES
         // =========================================================
         services.AddAuthFeatures();
+        services.AddContactFeatures();
     }
 }

@@ -8,40 +8,25 @@ namespace uni_chat_backend.Infrastructure.DependencyInjection;
 
 public static class AuthenticationInjection
 {
-    public static void AddJwtAuthentication(this IServiceCollection services,
-        IConfiguration configuration)
+    public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var jwtSettings = configuration
-                              .GetSection("Jwt")
-                              .Get<JwtSettings>()
-                          ?? throw new InvalidOperationException(
-                              "Jwt settings missing"
-                          );
+        var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>() ??
+                          throw new InvalidOperationException("Jwt settings missing");
 
-        services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters =
-                    new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-
-                        ValidIssuer = jwtSettings.Issuer,
-
-                        ValidAudience = jwtSettings.Audience,
-
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(jwtSettings.Key)
-                            ),
-
-                        NameClaimType =
-                            ClaimTypes.NameIdentifier
-                    };
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+                    NameClaimType = ClaimTypes.NameIdentifier
+                };
 
                 // =====================================================
                 // SIGNALR
@@ -54,8 +39,7 @@ public static class AuthenticationInjection
 
                         var path = context.HttpContext.Request.Path;
 
-                        if (!string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments("/messages/chat"))
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/messages/chat"))
                             context.Token = accessToken;
 
                         return Task.CompletedTask;

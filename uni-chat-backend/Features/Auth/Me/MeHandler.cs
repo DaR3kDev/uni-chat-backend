@@ -12,8 +12,6 @@ public class MeHandler(MeService service)
         CancellationToken cancellationToken
     )
     {
-        return await service.GetCurrentUserAsync(
-            cancellationToken
-        );
+        return await service.GetCurrentUserAsync();
     }
 }

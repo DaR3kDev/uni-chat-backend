@@ -9,12 +9,8 @@ public static class MessageDeliveryIndexes
     {
         var collection = db.GetCollection<MessageDelivery>("message_delivery");
 
-        await collection.Indexes.CreateOneAsync(
-            new CreateIndexModel<MessageDelivery>(
-                Builders<MessageDelivery>.IndexKeys
-                    .Ascending(x => x.MessageId)
-                    .Ascending(x => x.UserId)
-            )
-        );
+        await collection.Indexes.CreateOneAsync(new CreateIndexModel<MessageDelivery>(Builders<MessageDelivery>
+            .IndexKeys.Ascending(x => x.MessageId)
+            .Ascending(x => x.UserId)));
     }
 }
