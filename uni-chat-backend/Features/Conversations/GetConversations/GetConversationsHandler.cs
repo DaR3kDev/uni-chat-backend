@@ -1,7 +1,7 @@
-using System.Text.Json;
 using MediatR;
-using StackExchange.Redis;
+using Microsoft.Extensions.Logging;
 using uni_chat_backend.Application.Common.Exceptions;
+using uni_chat_backend.Features.Conversations.GetConversations.Interfaces;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using uni_chat_backend.Infrastructure.Security.Interfaces;
 
@@ -11,7 +11,8 @@ public class GetConversationsHandler(
     IUserRepository userRepository,
     IConversationRepository conversationRepository,
     ICurrentUserService currentUser,
-    IConnectionMultiplexer redis
+    IGetConversationsCache cache,
+    ILogger<GetConversationsHandler> logger
 ) : IRequestHandler<GetConversationsQuery, List<GetConversationsResult>>
 {
     public async Task<List<GetConversationsResult>> Handle(
@@ -19,29 +20,39 @@ public class GetConversationsHandler(
         CancellationToken cancellationToken)
     {
         var userId = currentUser.UserId
-                     ?? throw new UnauthorizedException("No autorizado");
+            ?? throw new UnauthorizedException("No autorizado");
 
-        var db = redis.GetDatabase();
-        var cacheKey = $"conversations:{userId}";
-        var cached = await db.StringGetAsync(cacheKey);
+        logger.LogInformation(
+            "Iniciando obtención de conversaciones para usuario: {UserId}",
+            userId
+        );
 
+        var cached = await cache.GetAsync(userId);
 
-        if (cached.HasValue)
+        if (cached is not null)
         {
-            var json = cached.ToString();
+            logger.LogInformation(
+                "Conversaciones obtenidas desde caché. Count: {Count}, UserId: {UserId}",
+                cached.Count,
+                userId
+            );
 
-            if (!string.IsNullOrWhiteSpace(json))
-            {
-                var cachedResponse =
-                    JsonSerializer.Deserialize<List<GetConversationsResult>>(json);
-
-                if (cachedResponse is not null)
-                    return cachedResponse;
-            }
+            return cached;
         }
+
+        logger.LogInformation(
+            "Cache MISS de conversaciones. Consultando base de datos para usuario: {UserId}",
+            userId
+        );
 
         var conversations =
             await conversationRepository.GetUserConversationsAsync(userId);
+
+        logger.LogInformation(
+            "Conversaciones encontradas en base de datos: {Count}, UserId: {UserId}",
+            conversations.Count,
+            userId
+        );
 
         var participantIds = conversations
             .SelectMany(c => c.Participants)
@@ -50,44 +61,57 @@ public class GetConversationsHandler(
             .Distinct()
             .ToList();
 
+        logger.LogInformation(
+            "Obteniendo información de participantes. Participants: {Count}",
+            participantIds.Count
+        );
+
         var users = await userRepository.GetByIdsAsync(participantIds);
 
         var usersMap = users.ToDictionary(x => x.Id);
 
-        var tasks = conversations.Select(async conversation =>
-        {
-            var participant = conversation.Participants
-                .FirstOrDefault(p => p.UserId != userId);
+        var onlineUsers = await cache.GetOnlineStatusesAsync(participantIds);
 
-            if (participant is null)
-                return null;
+        var response = conversations
+            .Select(conversation =>
+            {
+                var participant = conversation.Participants
+                    .FirstOrDefault(p => p.UserId != userId);
 
-            if (!usersMap.TryGetValue(participant.UserId, out var user))
-                return null;
+                if (participant is null)
+                    return null;
 
-            var isOnline =
-                await db.StringGetAsync($"user:{user.Id}:online");
+                if (!usersMap.TryGetValue(participant.UserId, out var user))
+                    return null;
 
-            return new GetConversationsResult(
-                conversation.Id,
-                user.Id,
-                user.Username,
-                isOnline == "true",
-                user.LastSeen,
-                conversation.CreatedAt,
-                conversation.LastMessageAt
-            );
-        });
+                onlineUsers.TryGetValue(user.Id, out var isOnline);
 
-        var response = (await Task.WhenAll(tasks))
+                return new GetConversationsResult(
+                    conversation.Id,
+                    user.Id,
+                    user.Username,
+                    isOnline,
+                    user.LastSeen,
+                    conversation.CreatedAt,
+                    conversation.LastMessageAt
+                );
+            })
             .Where(x => x is not null)
             .Select(x => x!)
             .ToList();
 
-        await db.StringSetAsync(
-            cacheKey,
-            JsonSerializer.Serialize(response),
-            TimeSpan.FromMinutes(5)
+        await cache.SetAsync(userId, response);
+
+        logger.LogInformation(
+            "Conversaciones almacenadas en caché. Count: {Count}, UserId: {UserId}",
+            response.Count,
+            userId
+        );
+
+        logger.LogInformation(
+            "Proceso de obtención de conversaciones finalizado correctamente. Count: {Count}, UserId: {UserId}",
+            response.Count,
+            userId
         );
 
         return response;
