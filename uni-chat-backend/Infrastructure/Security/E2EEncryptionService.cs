@@ -6,7 +6,6 @@ namespace uni_chat_backend.Infrastructure.Security;
 public static class E2EEncryptionService
 {
     private const int IvLength = 16;
-
     public static byte[] GenerateKey()
     {
         using var aes = Aes.Create();
@@ -34,9 +33,9 @@ public static class E2EEncryptionService
         return Convert.ToBase64String(ms.ToArray());
     }
 
-    public static string Decrypt(string cipherText, byte[] key)
+    public static string Decrypt(string? cipherText, byte[] key)
     {
-        var fullCipher = Convert.FromBase64String(cipherText);
+        var fullCipher = Convert.FromBase64String(cipherText ?? throw new ArgumentNullException(nameof(cipherText)));
 
         var iv = new byte[IvLength];
         Array.Copy(fullCipher, 0, iv, 0, IvLength);

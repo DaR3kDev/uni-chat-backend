@@ -1,5 +1,5 @@
 using MediatR;
-using uni_chat_backend.Features.Messages.SendMessage;
+using uni_chat_backend.Features.Messages.SendMessage.Contracts;
 using uni_chat_backend.Features.Messages.UploadFile;
 
 namespace uni_chat_backend.API.Endpoints.Messages;

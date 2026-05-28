@@ -1,5 +1,5 @@
 using MediatR;
-using uni_chat_backend.Features.Messages.GetMessages;
+using uni_chat_backend.Features.Messages.GetMessages.Contracts;
 
 namespace uni_chat_backend.API.Endpoints.Messages;
 

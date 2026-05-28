@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using uni_chat_backend.Domain.Enums;
 using uni_chat_backend.Features.Conversations.JoinConversation.Contracts;
-using uni_chat_backend.Features.Messages.SendMessage;
+using uni_chat_backend.Features.Messages.SendMessage.Contracts;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
 using Wolverine;
 
@@ -54,29 +54,12 @@ public class ChatHub(
     public async Task SendMessage(Guid conversationId, string? content, string? fileUrl, string? fileName,
         MessageType? type)
     {
-        var senderId = GetUserIdOrThrow();
-
         if (string.IsNullOrWhiteSpace(content) && string.IsNullOrWhiteSpace(fileUrl))
             throw new HubException("El mensaje está vacío");
 
         var command = new SendMessageCommand(conversationId, content, fileUrl, fileName, type ?? MessageType.TEXT);
 
-        var message = await mediator.Send(command);
-
-        await Clients.Group(conversationId.ToString())
-            .SendAsync("ReceiveMessage",
-                new
-                {
-                    id = message.MessageId,
-                    conversationId = message.ConversationId,
-                    senderId = message.SenderId,
-                    content = message.Content,
-                    fileUrl = message.FileUrl,
-                    fileName = message.FileName,
-                    createdAt = message.CreatedAt,
-                    status = "sent",
-                    type = message.Type.ToString().ToUpper()
-                });
+        await mediator.Send(command);
     }
 
     public async Task LeaveConversation(Guid conversationId)

@@ -1,6 +1,6 @@
 using JasperFx.CodeGeneration;
 using uni_chat_backend.Features.Conversations.JoinConversation.Contracts;
-using uni_chat_backend.Features.Messages.SendMessage;
+using uni_chat_backend.Features.Messages.SendMessage.Contracts;
 using uni_chat_backend.Infrastructure.Settings;
 using Wolverine;
 using Wolverine.ErrorHandling;
@@ -10,57 +10,73 @@ namespace uni_chat_backend.API.Configuration.DependencyInjection;
 
 public static class WolverineConfiguration
 {
-    public static void AddWolverineConfiguration(
-        this IHostBuilder host,
-        IConfiguration configuration)
+    public static void AddWolverineConfiguration(this IHostBuilder host, IConfiguration configuration)
     {
-        var rabbitSettings =
-            configuration.GetSection("RabbitMQ")
-                .Get<RabbitMqSettings>();
+        var rabbitSettings = configuration.GetSection("RabbitMQ").Get<RabbitMqSettings>();
 
-        if (rabbitSettings is null ||
-            string.IsNullOrWhiteSpace(rabbitSettings.ConnectionString))
+        if (rabbitSettings is null || string.IsNullOrWhiteSpace(rabbitSettings.ConnectionString))
         {
-            throw new InvalidOperationException(
-                "RabbitMQ ConnectionString is missing or empty.");
+            throw new InvalidOperationException("RabbitMQ ConnectionString is missing or empty.");
         }
 
         host.UseWolverine(options =>
         {
-            options.UseRabbitMq(new Uri(rabbitSettings.ConnectionString))
-                .AutoProvision();
+            // =========================================
+            // RABBITMQ
+            // =========================================
+
+            options.UseRabbitMq(new Uri(rabbitSettings.ConnectionString)).AutoProvision()
+                .DeclareExchange("messages.sent", exchange =>
+                {
+                    exchange.BindQueue("messages.sent.realtime");
+                    exchange.BindQueue("messages.sent.cache");
+                }); 
+
+            // =========================================
+            // CODE GENERATION
+            // =========================================
 
             options.CodeGeneration.TypeLoadMode = TypeLoadMode.Auto;
 
-            // PUBLICADORES
-            options.PublishMessage<SendMessageEvent>()
-                .ToRabbitQueue("messages.send");
+            // =========================================
+            // MESSAGE SENT
+            // =========================================
 
-            options.PublishMessage<UserJoinedConversation>()
-                .ToRabbitQueue("conversations.user-joined");
+            options.PublishMessage<MessageSent>()
+                .ToRabbitExchange("messages.sent");
 
-            // LISTENERS
-            options.ListenToRabbitQueue("conversations.user-joined")
-                .UseDurableInbox()
-                .MaximumParallelMessages(5);
+            options.ListenToRabbitQueue("messages.sent.realtime")
+                .UseDurableInbox();
 
-            // RETRIES
-            options.Policies
-                .OnException<Exception>()
-                .RetryTimes(3);
+            options.ListenToRabbitQueue("messages.sent.cache")
+                .UseDurableInbox();
 
-            // DEAD LETTER
-            options.Policies
-                .OnException<Exception>()
-                .MoveToErrorQueue();
+            // =========================================
+            // USER JOINED
+            // =========================================
 
-            // TRANSACCIONES
-            options.Policies.AutoApplyTransactions();
+            options.PublishMessage<UserJoinedConversation>().ToRabbitExchange("conversations.user-joined");
 
-            // DURABLE LOCAL QUEUES
+            options.ListenToRabbitQueue("conversations.user-joined.queue").UseDurableInbox();
+
+            // =========================================
+            // HANDLER DISCOVERY
+            // =========================================
+
+            options.Discovery.IncludeAssembly(typeof(WolverineConfiguration).Assembly);
+
+            // =========================================
+            // ERROR HANDLING
+            // =========================================
+
+            options.Policies.OnException<Exception>().RetryTimes(3).Then.MoveToErrorQueue();
+
             options.Policies.UseDurableLocalQueues();
 
-            // SERIALIZACIÓN
+            // =========================================
+            // SERIALIZATION
+            // =========================================
+
             options.UseSystemTextJsonForSerialization();
         });
     }
