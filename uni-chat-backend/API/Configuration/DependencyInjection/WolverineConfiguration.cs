@@ -30,7 +30,7 @@ public static class WolverineConfiguration
                 {
                     exchange.BindQueue("messages.sent.realtime");
                     exchange.BindQueue("messages.sent.cache");
-                }); 
+                });
 
             // =========================================
             // CODE GENERATION

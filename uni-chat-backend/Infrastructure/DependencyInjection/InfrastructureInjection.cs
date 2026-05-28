@@ -28,5 +28,5 @@ public static class InfrastructureInjection
         services.AddContactFeatures();
         services.AddConversationsFeatures();
         services.AddMessagesFeatures();
-    }   
+    }
 }
