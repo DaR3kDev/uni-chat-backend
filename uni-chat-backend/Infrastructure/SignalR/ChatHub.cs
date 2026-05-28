@@ -3,8 +3,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using uni_chat_backend.Domain.Enums;
+using uni_chat_backend.Features.Conversations.JoinConversation.Contracts;
 using uni_chat_backend.Features.Messages.SendMessage;
 using uni_chat_backend.Infrastructure.Repositories.Interfaces;
+using Wolverine;
 
 namespace uni_chat_backend.Infrastructure.SignalR;
 
@@ -12,7 +14,8 @@ namespace uni_chat_backend.Infrastructure.SignalR;
 public class ChatHub(
     IMediator mediator,
     IConversationRepository conversationRepository,
-    IMessageRepository messageRepository) : Hub
+    IMessageRepository messageRepository,
+    IMessageBus bus) : Hub
 {
     public override async Task OnConnectedAsync()
     {
@@ -39,7 +42,11 @@ public class ChatHub(
 
         if (!isParticipant) throw new HubException("No perteneces a esta conversación");
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, conversationId.ToString());
+        var groupName = conversationId.ToString();
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+
+        await bus.PublishAsync(new UserJoinedConversation(conversationId, userId, DateTime.UtcNow));
 
         await Clients.Caller.SendAsync("JoinedConversation", new { conversationId, success = true });
     }

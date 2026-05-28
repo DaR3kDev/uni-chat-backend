@@ -1,4 +1,4 @@
-namespace uni_chat_backend.Features.Conversations.GetOrCreateDirect;
+namespace uni_chat_backend.Features.Conversations.GetOrCreateDirect.Contracts;
 
 public record ConversationDto(
     Guid Id,

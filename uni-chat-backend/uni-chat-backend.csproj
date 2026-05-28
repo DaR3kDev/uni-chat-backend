@@ -9,38 +9,38 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CloudinaryDotNet" Version="1.29.1"/>
-        <PackageReference Include="DotNetEnv" Version="3.2.0"/>
-        <PackageReference Include="FluentValidation" Version="12.1.1"/>
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
-        <PackageReference Include="Mapster" Version="10.0.7"/>
-        <PackageReference Include="MediatR" Version="14.1.0"/>
-        <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="14.1.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8"/>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8"/>
-        <PackageReference Include="MongoDB.Bson" Version="3.8.1"/>
-        <PackageReference Include="MongoDB.Driver" Version="3.8.1"/>
-        <PackageReference Include="RabbitMQ.Client" Version="7.2.1"/>
-        <PackageReference Include="Scalar.AspNetCore" Version="2.14.11"/>
-        <PackageReference Include="Serilog" Version="4.3.2-dev-02433"/>
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
-        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
-        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
-        <PackageReference Include="Serilog.Exceptions" Version="8.4.0"/>
-        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1"/>
-        <PackageReference Include="Serilog.Sinks.Seq" Version="9.1.0"/>
-        <PackageReference Include="SharpCompress" Version="0.48.0"/>
-        <PackageReference Include="StackExchange.Redis" Version="2.13.1"/>
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0"/>
-        <PackageReference Include="WolverineFx" Version="5.39.0"/>
-        <PackageReference Include="WolverineFx.RabbitMQ" Version="5.39.0"/>
+        <PackageReference Include="CloudinaryDotNet" Version="1.29.1" />
+        <PackageReference Include="DotNetEnv" Version="3.2.0" />
+        <PackageReference Include="FluentValidation" Version="12.1.1" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+        <PackageReference Include="Mapster" Version="10.0.7" />
+        <PackageReference Include="MediatR" Version="14.1.0" />
+        <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="14.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+        <PackageReference Include="MongoDB.Bson" Version="3.8.1" />
+        <PackageReference Include="MongoDB.Driver" Version="3.8.1" />
+        <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.14.11" />
+        <PackageReference Include="Serilog" Version="4.3.2-dev-02433" />
+        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+        <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="9.1.0" />
+        <PackageReference Include="SharpCompress" Version="0.48.0" />
+        <PackageReference Include="StackExchange.Redis" Version="2.13.1" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
+        <PackageReference Include="WolverineFx" Version="5.39.0" />
+        <PackageReference Include="WolverineFx.RabbitMQ" Version="5.39.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="uni-chat-backend.Tests/**"/>
-        <Content Remove="uni-chat-backend.Tests/**"/>
-        <EmbeddedResource Remove="uni-chat-backend.Tests/**"/>
-        <None Remove="uni-chat-backend.Tests/**"/>
+        <Compile Remove="uni-chat-backend.Tests/**" />
+        <Content Remove="uni-chat-backend.Tests/**" />
+        <EmbeddedResource Remove="uni-chat-backend.Tests/**" />
+        <None Remove="uni-chat-backend.Tests/**" />
     </ItemGroup>
 
     <ItemGroup>

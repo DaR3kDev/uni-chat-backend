@@ -1,5 +1,6 @@
 using MediatR;
 using uni_chat_backend.Features.Conversations.JoinConversation;
+using uni_chat_backend.Features.Conversations.JoinConversation.Contracts;
 
 namespace uni_chat_backend.API.Endpoints.Conversations;
 

@@ -1,4 +1,4 @@
-namespace uni_chat_backend.Features.Conversations.GetConversations;
+namespace uni_chat_backend.Features.Conversations.GetConversations.Contracts;
 
 public record GetConversationsResult(
     Guid ConversationId,

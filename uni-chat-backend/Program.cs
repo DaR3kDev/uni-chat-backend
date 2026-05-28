@@ -3,7 +3,6 @@ using Serilog;
 using Serilog.Exceptions;
 using uni_chat_backend.API.Configuration.DependencyInjection;
 using uni_chat_backend.API.Configuration.Middleware;
-
 using uni_chat_backend.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +23,7 @@ Log.Logger = new LoggerConfiguration()
         "[Thread: {ThreadId}] " +
         "{Message:lj}{NewLine}{Exception}"
     )
-    .WriteTo.Seq("http://seq:80")
+    .WriteTo.Seq("http://localhost:5341")
     .CreateLogger();
 
 builder.Host.UseSerilog();
